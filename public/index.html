@@ -673,7 +673,8 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        let token = null;
+        // Initialize token from localStorage
+        let token = localStorage.getItem("adminToken");
 
         const content = document.getElementById("content");
         const lightbox = document.getElementById("lightbox");
@@ -1031,14 +1032,30 @@
                 ?.addEventListener("change", async (e) => {
                   const file = e.target.files[0];
                   if (!file) return;
-                  const fd = new FormData();
-                  fd.append("file", file);
-                  await fetch("/upload/portfolio", {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token },
-                    body: fd,
-                  });
-                  loadPage("portfolio");
+                  try {
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    const response = await fetch("/upload/portfolio", {
+                      method: "POST",
+                      headers: { Authorization: "Bearer " + token },
+                      body: fd,
+                    });
+                    
+                    const result = await response.json();
+                    if (response.ok) {
+                      loadPage("portfolio");
+                    } else {
+                      alert("❌ Upload failed: " + (result.error || "Unknown error"));
+                      if (response.status === 401) {
+                        localStorage.removeItem("adminToken");
+                        token = null;
+                        loadPage("login");
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Upload error:", error);
+                    alert("❌ Upload failed. Please try again.");
+                  }
                 });
 
               document
@@ -1047,11 +1064,27 @@
                   btn.addEventListener("click", async (e) => {
                     e.stopPropagation();
                     const id = btn.parentElement.dataset.id;
-                    await fetch("/portfolio/" + id, {
-                      method: "DELETE",
-                      headers: { Authorization: "Bearer " + token },
-                    });
-                    loadPage("portfolio");
+                    try {
+                      const response = await fetch("/portfolio/" + id, {
+                        method: "DELETE",
+                        headers: { Authorization: "Bearer " + token },
+                      });
+                      
+                      const result = await response.json();
+                      if (response.ok) {
+                        loadPage("portfolio");
+                      } else {
+                        alert("❌ Delete failed: " + (result.error || "Unknown error"));
+                        if (response.status === 401) {
+                          localStorage.removeItem("adminToken");
+                          token = null;
+                          loadPage("login");
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Delete error:", error);
+                      alert("❌ Delete failed. Please try again.");
+                    }
                   });
                 });
 
@@ -1099,14 +1132,20 @@
                     method: "POST",
                     body: formData,
                   });
+                  
+                  const data = await res.json();
                   if (res.ok) {
-                    alert("✅ Message sent!");
+                    alert("✅ " + (data.message || "Message sent!"));
                     e.target.reset();
                   } else {
-                    alert("❌ Failed to send message.");
+                    const errorMsg = data.errors ? 
+                      data.errors.map(err => err.msg).join(", ") : 
+                      (data.error || "Failed to send message");
+                    alert("❌ " + errorMsg);
                   }
-                } catch {
-                  alert("❌ Error sending message.");
+                } catch (error) {
+                  console.error("Contact error:", error);
+                  alert("❌ Network error. Please try again.");
                 }
               });
           }
@@ -1126,16 +1165,33 @@
             closeMenuOnLinkClick();
             document
               .getElementById("loginForm")
-              .addEventListener("submit", (e) => {
+              .addEventListener("submit", async (e) => {
                 e.preventDefault();
-                const u = document.getElementById("user").value;
-                const p = document.getElementById("pass").value;
-                if (u === "Martin3z" && p === "May2nd1989") {
-                  token = "valid";
-                  alert("Logged in");
-                  loadPage("home");
-                } else {
-                  alert("Invalid");
+                const username = document.getElementById("user").value;
+                const password = document.getElementById("pass").value;
+                
+                try {
+                  const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ username, password }),
+                  });
+                  
+                  const data = await response.json();
+                  
+                  if (response.ok) {
+                    token = data.token;
+                    localStorage.setItem("adminToken", token);
+                    alert("✅ Login successful");
+                    loadPage("home");
+                  } else {
+                    alert("❌ " + (data.error || "Login failed"));
+                  }
+                } catch (error) {
+                  console.error("Login error:", error);
+                  alert("❌ Network error. Please try again.");
                 }
               });
           }
