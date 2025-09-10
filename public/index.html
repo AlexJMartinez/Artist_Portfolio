@@ -817,7 +817,8 @@
         <li><a onclick="loadPage('about')">About</a></li>
         <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
         <li><a onclick="loadPage('contact')">Contact</a></li>
-        <li><a onclick="loadPage('login')">Login</a></li>
+        <li><a id="loginBtn" onclick="loadPage('login')">Login</a></li>
+        <li><a id="logoutBtn" onclick="logout()" style="display: none;">Logout</a></li>
       </ul>
     </nav>
 
@@ -853,9 +854,13 @@
               <i class="fas fa-envelope"></i>
               <span>Contact</span>
             </a>
-            <a class="floating-nav-overflow-item" onclick="loadPage('login')" data-page="login">
+            <a class="floating-nav-overflow-item" id="pillLoginBtn" onclick="loadPage('login')" data-page="login">
               <i class="fas fa-sign-in-alt"></i>
               <span>Login</span>
+            </a>
+            <a class="floating-nav-overflow-item" id="pillLogoutBtn" onclick="logout()" style="display: none;">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
             </a>
           </div>
         </div>
@@ -1375,6 +1380,7 @@
                   if (response.ok) {
                     token = data.token;
                     localStorage.setItem("adminToken", token);
+                    updateNavigation();
                     alert("✅ Login successful");
                     loadPage("home");
                   } else {
@@ -1385,6 +1391,36 @@
                   alert("❌ Network error. Please try again.");
                 }
               });
+          }
+        }
+
+        /* ===== Authentication Functions ===== */
+        function logout() {
+          token = null;
+          localStorage.removeItem("adminToken");
+          updateNavigation();
+          loadPage("home");
+          alert("✅ Logged out successfully");
+        }
+
+        function updateNavigation() {
+          const loginBtn = document.getElementById("loginBtn");
+          const logoutBtn = document.getElementById("logoutBtn");
+          const pillLoginBtn = document.getElementById("pillLoginBtn");
+          const pillLogoutBtn = document.getElementById("pillLogoutBtn");
+
+          if (token) {
+            // Admin is logged in - show logout, hide login
+            if (loginBtn) loginBtn.style.display = "none";
+            if (logoutBtn) logoutBtn.style.display = "block";
+            if (pillLoginBtn) pillLoginBtn.style.display = "none";
+            if (pillLogoutBtn) pillLogoutBtn.style.display = "block";
+          } else {
+            // Admin is not logged in - show login, hide logout
+            if (loginBtn) loginBtn.style.display = "block";
+            if (logoutBtn) logoutBtn.style.display = "none";
+            if (pillLoginBtn) pillLoginBtn.style.display = "block";
+            if (pillLogoutBtn) pillLogoutBtn.style.display = "none";
           }
         }
 
@@ -1602,6 +1638,7 @@
 
         /* Boot */
         initFloatingNav();
+        updateNavigation(); // Set initial navigation state
         loadPage("home");
         window.loadPage = loadPage;
       });
