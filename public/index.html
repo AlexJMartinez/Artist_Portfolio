@@ -623,6 +623,7 @@
         main {
           padding-left: 1rem;
           padding-right: 1rem;
+          padding-bottom: 7rem; /* Extra space for floating nav */
         }
         .hero {
           padding: 4rem 1rem;
@@ -631,6 +632,158 @@
         .about-text {
           padding: 0 0.5rem;
           max-width: 90vw;
+        }
+      }
+
+      /* ===== FLOATING PILL NAVIGATION ===== */
+      .floating-nav {
+        display: none; /* Hidden by default, shown on mobile */
+        position: fixed;
+        bottom: env(safe-area-inset-bottom, 24px);
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        pointer-events: none;
+      }
+
+      .floating-nav-pill {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 28px;
+        padding: 8px 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+                    0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        pointer-events: auto;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .floating-nav-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
+                    0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .floating-nav-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        height: 44px;
+        margin: 0 2px;
+        border-radius: 20px;
+        color: #666;
+        font-size: 18px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 2;
+      }
+
+      .floating-nav-item i {
+        transition: transform 0.2s ease;
+      }
+
+      .floating-nav-item:hover {
+        color: #333;
+        transform: scale(1.05);
+      }
+
+      .floating-nav-item:hover i {
+        transform: scale(1.1);
+      }
+
+      .floating-nav-item.active {
+        color: #fff;
+        font-weight: 500;
+      }
+
+      .floating-nav-active-bg {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 44px;
+        height: 44px;
+        background: #e63946;
+        border-radius: 20px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1;
+        box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
+      }
+
+      .floating-nav-overflow {
+        position: relative;
+        cursor: pointer;
+      }
+
+      .floating-nav-overflow-menu {
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        margin-bottom: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        opacity: 0;
+        transform: translateY(8px) scale(0.9);
+        transition: all 0.2s ease;
+        pointer-events: none;
+        min-width: 120px;
+      }
+
+      .floating-nav-overflow-menu.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+      }
+
+      .floating-nav-overflow-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        margin: 2px 0;
+        border-radius: 8px;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .floating-nav-overflow-item:hover {
+        background: rgba(230, 57, 70, 0.1);
+        color: #e63946;
+      }
+
+      .floating-nav-overflow-item i {
+        width: 16px;
+        font-size: 14px;
+      }
+
+      /* Show floating nav on mobile */
+      @media (max-width: 700px) {
+        .floating-nav {
+          display: block;
+        }
+      }
+
+      /* Respect reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        .floating-nav-pill,
+        .floating-nav-item,
+        .floating-nav-active-bg,
+        .floating-nav-overflow-menu {
+          transition: none;
         }
       }
     </style>
@@ -669,6 +822,35 @@
       <span class="lightbox-nav lightbox-prev">&#10094;</span>
       <div class="lightbox-content"></div>
       <span class="lightbox-nav lightbox-next">&#10095;</span>
+    </div>
+
+    <!-- Floating Mobile Navigation -->
+    <div class="floating-nav">
+      <div class="floating-nav-pill">
+        <div class="floating-nav-active-bg"></div>
+        <a class="floating-nav-item" onclick="loadPage('home')" data-page="home">
+          <i class="fas fa-home"></i>
+        </a>
+        <a class="floating-nav-item" onclick="loadPage('portfolio')" data-page="portfolio">
+          <i class="fas fa-th-large"></i>
+        </a>
+        <a class="floating-nav-item" onclick="loadPage('about')" data-page="about">
+          <i class="fas fa-user"></i>
+        </a>
+        <div class="floating-nav-overflow floating-nav-item">
+          <i class="fas fa-ellipsis-h"></i>
+          <div class="floating-nav-overflow-menu">
+            <a class="floating-nav-overflow-item" onclick="loadPage('contact')" data-page="contact">
+              <i class="fas fa-envelope"></i>
+              <span>Contact</span>
+            </a>
+            <a class="floating-nav-overflow-item" onclick="loadPage('login')" data-page="login">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Login</span>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -1349,7 +1531,68 @@
           }
         });
 
+        /* ===== Floating Navigation ===== */
+        function initFloatingNav() {
+          const floatingNav = document.querySelector('.floating-nav');
+          const navItems = document.querySelectorAll('.floating-nav-item:not(.floating-nav-overflow)');
+          const activeBg = document.querySelector('.floating-nav-active-bg');
+          const overflowBtn = document.querySelector('.floating-nav-overflow');
+          const overflowMenu = document.querySelector('.floating-nav-overflow-menu');
+          
+          if (!floatingNav) return;
+          
+          // Set active state and move background
+          function setActiveNav(page) {
+            navItems.forEach((item, index) => {
+              const itemPage = item.getAttribute('data-page');
+              if (itemPage === page) {
+                item.classList.add('active');
+                // Move active background to current item
+                const offsetX = index * (44 + 4) + 4; // 44px width + 4px margin + 4px initial offset
+                activeBg.style.transform = `translateX(${offsetX}px)`;
+              } else {
+                item.classList.remove('active');
+              }
+            });
+          }
+
+          // Handle overflow menu
+          if (overflowBtn && overflowMenu) {
+            overflowBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              overflowMenu.classList.toggle('show');
+            });
+
+            // Close overflow menu when clicking outside
+            document.addEventListener('click', (e) => {
+              if (!overflowBtn.contains(e.target)) {
+                overflowMenu.classList.remove('show');
+              }
+            });
+
+            // Close overflow menu when clicking an item
+            document.querySelectorAll('.floating-nav-overflow-item').forEach(item => {
+              item.addEventListener('click', () => {
+                overflowMenu.classList.remove('show');
+              });
+            });
+          }
+
+          // Update active state when page changes
+          window.updateFloatingNav = setActiveNav;
+        }
+
+        // Enhance loadPage to update floating nav
+        const originalLoadPage = loadPage;
+        loadPage = function(page) {
+          originalLoadPage(page);
+          if (window.updateFloatingNav) {
+            window.updateFloatingNav(page);
+          }
+        };
+
         /* Boot */
+        initFloatingNav();
         loadPage("home");
         window.loadPage = loadPage;
       });
