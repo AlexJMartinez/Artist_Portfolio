@@ -1399,8 +1399,21 @@
           token = null;
           localStorage.removeItem("adminToken");
           updateNavigation();
-          loadPage("home");
+          // Get current page to re-render it and remove admin UI elements
+          const currentPage = getCurrentPage();
+          loadPage(currentPage || "home");
           alert("✅ Logged out successfully");
+        }
+
+        function getCurrentPage() {
+          // Determine current page based on content
+          const content = document.getElementById("content");
+          if (content.querySelector(".hero")) return "home";
+          if (content.querySelector(".about")) return "about";
+          if (content.querySelector(".portfolio-wrapper")) return "portfolio";
+          if (content.querySelector(".contact-card")) return "contact";
+          if (content.querySelector(".login-card")) return "login";
+          return "home"; // fallback
         }
 
         function updateNavigation() {
@@ -1640,7 +1653,11 @@
         initFloatingNav();
         updateNavigation(); // Set initial navigation state
         loadPage("home");
+        
+        // Make functions globally accessible for inline onclick handlers
         window.loadPage = loadPage;
+        window.logout = logout;
+        window.updateNavigation = updateNavigation;
       });
     </script>
   </body>
