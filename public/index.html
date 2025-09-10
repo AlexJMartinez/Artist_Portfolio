@@ -647,6 +647,7 @@
       }
 
       .floating-nav-pill {
+        position: relative;
         display: flex;
         align-items: center;
         background: rgba(255, 255, 255, 0.85);
@@ -672,10 +673,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-width: 44px;
+        width: 44px;
         height: 44px;
         margin: 0 2px;
-        border-radius: 20px;
+        border-radius: 50%;
         color: #666;
         font-size: 18px;
         text-decoration: none;
@@ -685,11 +686,7 @@
       }
 
       .floating-nav-item i {
-        display: block;
-        width: 18px;
-        height: 18px;
-        line-height: 18px;
-        text-align: center;
+        line-height: 1;
         transition: transform 0.2s ease;
       }
 
@@ -709,12 +706,12 @@
 
       .floating-nav-active-bg {
         position: absolute;
-        top: 4px;
-        left: 4px;
+        top: 8px;
+        left: 12px;
         width: 44px;
         height: 44px;
         background: #e63946;
-        border-radius: 20px;
+        border-radius: 50%;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1;
         box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
