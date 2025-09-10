@@ -670,9 +670,8 @@
 
       .floating-nav-item {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: grid;
+        place-items: center;
         width: 44px;
         height: 44px;
         margin: 0 2px;
@@ -686,10 +685,10 @@
       }
 
       .floating-nav-item i {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-49%, -50%);
+        position: static;
+        display: inline-block;
+        width: 1.25em;
+        text-align: center;
         line-height: 1;
         transition: transform 0.2s ease;
       }
@@ -700,7 +699,7 @@
       }
 
       .floating-nav-item:hover i {
-        transform: translate(-49%, -50%) scale(1.1);
+        transform: scale(1.1);
       }
 
       .floating-nav-item.active {
@@ -711,11 +710,12 @@
       .floating-nav-active-bg {
         position: absolute;
         top: 8px;
-        left: 12.5px;
+        left: 0;
         width: 44px;
         height: 44px;
         background: #e63946;
         border-radius: 50%;
+        transform: translateX(0);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1;
         box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
@@ -841,16 +841,16 @@
       <div class="floating-nav-pill">
         <div class="floating-nav-active-bg"></div>
         <a class="floating-nav-item" onclick="loadPage('home')" data-page="home">
-          <i class="fas fa-home"></i>
+          <i class="fas fa-home fa-fw"></i>
         </a>
         <a class="floating-nav-item" onclick="loadPage('portfolio')" data-page="portfolio">
-          <i class="fas fa-th-large"></i>
+          <i class="fas fa-th-large fa-fw"></i>
         </a>
         <a class="floating-nav-item" onclick="loadPage('about')" data-page="about">
-          <i class="fas fa-user"></i>
+          <i class="fas fa-user fa-fw"></i>
         </a>
         <div class="floating-nav-overflow floating-nav-item">
-          <i class="fas fa-ellipsis-h"></i>
+          <i class="fas fa-ellipsis-h fa-fw"></i>
           <div class="floating-nav-overflow-menu">
             <a class="floating-nav-overflow-item" onclick="loadPage('contact')" data-page="contact">
               <i class="fas fa-envelope"></i>
@@ -1603,15 +1603,21 @@
           
           if (!floatingNav) return;
           
+          // Move active background to specific item
+          function moveActiveBgTo(activeItem) {
+            const pill = document.querySelector('.floating-nav-pill');
+            const bg = pill.querySelector('.floating-nav-active-bg');
+            const x = activeItem.offsetLeft + (activeItem.offsetWidth - bg.offsetWidth) / 2;
+            bg.style.transform = `translateX(${Math.round(x)}px)`;
+          }
+
           // Set active state and move background
           function setActiveNav(page) {
-            navItems.forEach((item, index) => {
+            navItems.forEach((item) => {
               const itemPage = item.getAttribute('data-page');
               if (itemPage === page) {
                 item.classList.add('active');
-                // Move active background to current item
-                const offsetX = index * (44 + 4) + 4; // 44px width + 4px margin + 4px initial offset
-                activeBg.style.transform = `translateX(${offsetX}px)`;
+                moveActiveBgTo(item);
               } else {
                 item.classList.remove('active');
               }
