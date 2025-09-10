@@ -1238,8 +1238,7 @@
               btn.style.color = color;
               btn.style.textShadow = shadow;
             }
-            closeBtn.style.color = color;
-            closeBtn.style.textShadow = shadow;
+            // Close button always stays white - removed dynamic color change
           } catch (e) {
             /* cross-origin media may block drawImage */
           }
