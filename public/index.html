@@ -1292,6 +1292,47 @@
             openLightbox(mediaItems[currentIndex]);
           }
         });
+
+        /* ===== Touch/Swipe Support for Lightbox ===== */
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+
+        function handleTouchStart(e) {
+          touchStartX = e.changedTouches[0].screenX;
+          touchStartY = e.changedTouches[0].screenY;
+        }
+
+        function handleTouchEnd(e) {
+          touchEndX = e.changedTouches[0].screenX;
+          touchEndY = e.changedTouches[0].screenY;
+          handleSwipe();
+        }
+
+        function handleSwipe() {
+          const swipeThreshold = 50; // Minimum distance for swipe
+          const swipeRestraint = 100; // Maximum vertical movement allowed
+          const deltaX = touchEndX - touchStartX;
+          const deltaY = Math.abs(touchEndY - touchStartY);
+          
+          // Only trigger swipe if horizontal movement is significant and vertical movement is minimal
+          if (Math.abs(deltaX) >= swipeThreshold && deltaY <= swipeRestraint && mediaItems.length > 1) {
+            if (deltaX > 0) {
+              // Swipe right - go to previous image
+              currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+              openLightbox(mediaItems[currentIndex]);
+            } else {
+              // Swipe left - go to next image
+              currentIndex = (currentIndex + 1) % mediaItems.length;
+              openLightbox(mediaItems[currentIndex]);
+            }
+          }
+        }
+
+        // Add touch event listeners to lightbox
+        lightbox.addEventListener("touchstart", handleTouchStart, { passive: true });
+        lightbox.addEventListener("touchend", handleTouchEnd, { passive: true });
         document.addEventListener("keydown", (e) => {
           if (!lightbox.classList.contains("active")) return;
           if (e.key === "Escape") {
