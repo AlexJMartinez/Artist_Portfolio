@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alex Martínez – Artist</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
+    <style>
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        margin: 0;
+        background: linear-gradient(-45deg, #f0f0f0, #fafafa, #fdfdfd, #f0f0f0);
+        animation: gradientBG 20s ease infinite;
+      }
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* ===== NAV ===== */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        height: 70px;
+        width: 100%;
+        background: transparent;
+        z-index: 1000;
+        transition:
+          background 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      nav.scrolled {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(8px);
+      }
+      nav ul {
+        display: flex;
+        gap: 1rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      nav a {
+        text-decoration: none;
+        color: #111;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      /* Hamburger (hidden >700px) */
+      .nav-toggle {
+        display: none;
+        width: 42px;
+        height: 42px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-toggle .bar {
+        position: relative;
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: #111;
+        transition:
+          transform 0.25s ease,
+          opacity 0.2s ease;
+      }
+      .nav-toggle .bar + .bar {
+        margin-top: 6px;
+      }
+      nav.open .nav-toggle .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+      }
+      nav.open .nav-toggle .bar:nth-child(2) {
+        opacity: 0;
+      }
+      nav.open .nav-toggle .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+      }
+
+      /* Mobile dropdown */
+      @media (max-width: 700px) {
+        .nav-toggle {
+          display: inline-flex;
+        }
+        nav ul {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          flex-direction: column;
+          gap: 0;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(8px);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+          max-height: 0;
+          overflow: hidden;
+          padding: 0 1rem;
+          transition: max-height 0.25s ease;
+        }
+        nav.open ul {
+          max-height: 260px;
+          padding: 0.5rem 1rem 0.75rem;
+        }
+        nav ul li {
+          padding: 0.25rem 0;
+        }
+        nav a {
+          display: block;
+          padding: 0.25rem 0;
+          font-size: 0.95rem;
+        }
+      }
+
+      main {
+        padding: 8rem 2rem 2rem;
+      }
+
+      /* ===== HERO ===== */
+      .hero {
+        text-align: center;
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 6rem 2rem;
+      }
+      .hero h1 {
+        font-size: clamp(3rem, 8vw, 6rem);
+        font-weight: 900;
+        color: #111;
+        margin: 0;
+      }
+      .hero h2 {
+        font-size: 1.25rem;
+        color: #666;
+        margin-top: 1rem;
+      }
+
+      button,
+      .delete-btn {
+        background: none;
+        border: 2px solid #e63946;
+        color: #e63946;
+        transition: color 0.3s ease;
+      }
+      button:hover,
+      .delete-btn:hover {
+        color: #111;
+      }
+
+      .subscribe form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 2rem;
+        gap: 0.5rem;
+        max-width: 500px;
+      }
+      .subscribe input,
+      .subscribe button {
+        flex: 1 1 200px;
+        min-width: 150px;
+      }
+
+      .insta-icon {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 30% 107%,
+          #fdf497 0%,
+          #fd5949 45%,
+          #d6249f 60%,
+          #285aeb 90%
+        );
+        color: #fff;
+        font-size: 1.6rem;
+        margin-top: 1rem;
+        text-decoration: none;
+      }
+      .insta-icon:hover {
+        transform: scale(1.1);
+        text-decoration: none;
+      }
+      .insta-icon i {
+        line-height: 1;
+      }
+
+      /* ===== ABOUT ===== */
+      .about {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        text-align: center;
+        min-height: 80vh;
+      }
+      #about-canvas {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        margin: 0 auto;
+        overflow: visible;
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 300ms ease;
+        will-change: opacity;
+      }
+      #about-canvas:not(:empty) {
+        opacity: 1;
+      }
+      #about-canvas canvas {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 800px;
+        height: 800px;
+        transform: translate(-50%, -50%);
+        pointer-events: auto;
+        z-index: 2;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #about-canvas {
+          transition: none;
+          opacity: 1;
+        }
+      }
+      .about-text {
+        max-width: 700px;
+      }
+
+      /* ===== UPLOAD ===== */
+      .upload {
+        padding: 1.5rem;
+        margin: 2rem auto;
+        border: 2px dashed #bbb;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        background: #fff;
+        text-align: center;
+        cursor: pointer;
+        max-width: 400px;
+        width: 100%;
+      }
+      .upload input,
+      .upload button {
+        margin-top: 0.5rem;
+      }
+
+      /* ===== PORTFOLIO ===== */
+      .portfolio-wrapper {
+        max-width: 1000px;
+        margin: 6rem auto 0 auto;
+        min-height: 100vh;
+      }
+      .gallery {
+        column-count: 3;
+        column-gap: 2rem;
+      }
+      .gallery-item {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 1rem;
+        position: relative;
+        break-inside: avoid;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.6s ease forwards;
+        transition:
+          transform 0.6s ease,
+          opacity 0.6s ease;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .gallery-item img,
+      .gallery-item video {
+        width: 100%;
+        border-radius: 6px;
+        display: block;
+      }
+      .gallery-item video {
+        max-height: 500px;
+        object-fit: cover;
+        cursor: pointer;
+      }
+      .gallery-item:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      }
+      @media (max-width: 900px) {
+        .gallery {
+          column-count: 2;
+        }
+      }
+
+      /* ===== MOBILE: square tiles (Instagram-style) + smooth fade ===== */
+      @media (max-width: 600px) {
+        .gallery {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.75rem;
+
+          /* kill masonry columns just on mobile */
+          column-count: initial;
+          column-gap: 0.75rem;
+
+          /* equal left/right gutter */
+          padding-inline: 0.75rem;
+          box-sizing: border-box;
+        }
+
+        /* fade-up keyframes for mobile tiles */
+        @keyframes gridFadeUp {
+          from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        .gallery-item {
+          display: block;
+          position: relative;
+          margin: 0;
+          aspect-ratio: 1 / 1; /* squares */
+          overflow: hidden;
+          border-radius: 10px;
+          box-shadow: none;
+
+          /* smooth fade-in */
+          opacity: 0;
+          transform: translateY(8px) scale(0.98);
+          animation: gridFadeUp 3s ease forwards;
+          will-change: transform, opacity;
+        }
+
+        /* gentle stagger so rows don’t pop all at once */
+        .gallery-item:nth-child(2n) {
+          animation-delay: 0.05s;
+        }
+        .gallery-item:nth-child(3n) {
+          animation-delay: 0.1s;
+        }
+        .gallery-item:nth-child(4n) {
+          animation-delay: 0.15s;
+        }
+
+        .gallery-item:hover {
+          transform: none;
+          box-shadow: none;
+        }
+
+        .gallery-item img,
+        .gallery-item video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover; /* crop inside the square */
+          border-radius: 0;
+        }
+        .gallery-item video {
+          max-height: none;
+        } /* fill the square */
+
+        /* Respect reduced motion on mobile */
+        @media (prefers-reduced-motion: reduce) {
+          .gallery-item {
+            animation: none;
+            opacity: 1;
+            transform: none;
+          }
+        }
+      }
+
+      @media (pointer: coarse) {
+        .gallery-item:hover {
+          transform: none;
+          box-shadow: none;
+        }
+      }
+
+      /* Trash button */
+      .delete-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        cursor: pointer;
+        z-index: 2;
+      }
+      .gallery-item.admin .delete-btn {
+        display: block;
+      }
+
+      /* ===== LIGHTBOX ===== */
+      .lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+        z-index: 10000;
+      }
+      .lightbox.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      .lightbox-content {
+        max-width: 90vw;
+        max-height: 90vh;
+      }
+      .lightbox-content img,
+      .lightbox-content video {
+        max-width: 90vw;
+        max-height: 90vh;
+        width: auto;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        object-fit: contain;
+        display: block;
+        margin: auto;
+      }
+      .lightbox video {
+        background: #000;
+      }
+      .lightbox-close {
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        font-size: 2.5rem;
+        color: #fff;
+        cursor: pointer;
+        z-index: 10001;
+        text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+      }
+      .lightbox-nav {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 3rem;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        z-index: 10001;
+      }
+      .lightbox-prev {
+        left: 30px;
+      }
+      .lightbox-next {
+        right: 30px;
+      }
+      .lightbox-nav:hover {
+        background: rgba(0, 0, 0, 0.6);
+      }
+      @media (max-width: 600px) {
+        .lightbox-close {
+          font-size: 2rem;
+          top: 12px;
+          right: 16px;
+        }
+        .lightbox-nav {
+          font-size: 2rem;
+          padding: 0.25rem 0.5rem;
+        }
+      }
+
+      /* ===== CONTACT / LOGIN ===== */
+      .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 80px);
+        box-sizing: border-box;
+        padding: 0;
+      }
+      @keyframes fadeSlideIn {
+        0% {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .login-card,
+      .contact-card {
+        border: 1px solid #ddd;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        background: #fff;
+        width: 100%;
+        text-align: center;
+        margin-top: 0;
+        animation: fadeSlideIn 0.6s ease forwards;
+      }
+      .login-card {
+        max-width: 350px;
+      }
+      .contact-card {
+        max-width: 600px;
+      }
+      @media (max-width: 600px) {
+        .login-card,
+        .contact-card {
+          padding: 1.5rem;
+        }
+      }
+      .login-card form,
+      .contact-card form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      textarea {
+        min-height: 120px;
+        resize: none;
+        overflow: hidden;
+      }
+
+      footer {
+        text-align: center;
+        padding: 1.5rem 1rem;
+        font-size: 0.9rem;
+        color: #555;
+        font-style: italic;
+        opacity: 0.8;
+        background: transparent;
+        margin-top: 4rem;
+      }
+
+      /* ===== RESPONSIVE UTIL ===== */
+      #about-canvas {
+        width: clamp(260px, 60vw, 400px);
+        height: clamp(260px, 60vw, 400px);
+      }
+      #about-canvas canvas {
+        width: 200%;
+        height: 200%;
+      }
+      html,
+      body {
+        overflow-x: hidden;
+      }
+      @media (max-width: 900px) {
+        nav {
+          padding: 0.75rem 1rem;
+          height: 64px;
+        }
+        nav ul {
+          gap: 0.75rem;
+        }
+      }
+      @media (max-width: 600px) {
+        nav {
+          padding: 0.5rem 0.75rem;
+        }
+        main {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+        .hero {
+          padding: 4rem 1rem;
+          min-height: 70vh;
+        }
+        .about-text {
+          padding: 0 0.5rem;
+          max-width: 90vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <strong>Alex Martínez</strong>
+
+      <!-- Hamburger (mobile) -->
+      <button
+        class="nav-toggle"
+        aria-expanded="false"
+        aria-controls="primary-menu"
+        aria-label="Menu"
+      >
+        <span class="bar"></span><span class="bar"></span
+        ><span class="bar"></span>
+      </button>
+
+      <ul id="primary-menu">
+        <li><a onclick="loadPage('home')">Home</a></li>
+        <li><a onclick="loadPage('about')">About</a></li>
+        <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
+        <li><a onclick="loadPage('contact')">Contact</a></li>
+        <li><a onclick="loadPage('login')">Login</a></li>
+      </ul>
+    </nav>
+
+    <main id="content"></main>
+
+    <footer><p>Est. MCMLXXXIX</p></footer>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+      <span class="lightbox-close">&times;</span>
+      <span class="lightbox-nav lightbox-prev">&#10094;</span>
+      <div class="lightbox-content"></div>
+      <span class="lightbox-nav lightbox-next">&#10095;</span>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let token = null;
+
+        const content = document.getElementById("content");
+        const lightbox = document.getElementById("lightbox");
+        const lightboxContent = lightbox.querySelector(".lightbox-content");
+        const closeBtn = lightbox.querySelector(".lightbox-close");
+        const prevBtn = lightbox.querySelector(".lightbox-prev");
+        const nextBtn = lightbox.querySelector(".lightbox-next");
+
+        let currentIndex = 0;
+        let mediaItems = [];
+
+        const nav = document.querySelector("nav");
+        const main = document.querySelector("main");
+        const toggleBtn = document.querySelector(".nav-toggle");
+
+        /* ===== Hamburger logic ===== */
+        function setMenu(open) {
+          nav.classList.toggle("open", open);
+          toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+          adjustMainPadding();
+        }
+        toggleBtn.addEventListener("click", () =>
+          setMenu(!nav.classList.contains("open")),
+        );
+        function closeMenuOnLinkClick() {
+          document
+            .querySelectorAll("nav a")
+            .forEach((a) => a.addEventListener("click", () => setMenu(false)));
+        }
+
+        /* ===== About PIXI ===== */
+        let aboutPixiApp = null;
+        function initWavyImage(imageUrl) {
+          if (aboutPixiApp) {
+            aboutPixiApp.destroy(true, {
+              children: true,
+              texture: true,
+              baseTexture: true,
+            });
+            aboutPixiApp = null;
+          }
+          const visibleSize = 400,
+            canvasSize = 800;
+
+          aboutPixiApp = new PIXI.Application({
+            width: canvasSize,
+            height: canvasSize,
+            backgroundAlpha: 0,
+            antialias: true,
+            autoDensity: true,
+            resolution: window.devicePixelRatio || 3,
+            autoStart: false,
+          });
+
+          const view = aboutPixiApp.view;
+          view.style.width = "200%";
+          view.style.height = "200%";
+          view.style.opacity = "0";
+
+          const container = new PIXI.Container();
+          aboutPixiApp.stage.addChild(container);
+
+          const img = PIXI.Sprite.from(imageUrl);
+          img.anchor.set(0.5);
+          img.x = canvasSize / 2;
+          img.y = canvasSize / 2;
+          img.width = visibleSize;
+          img.height = visibleSize;
+          container.addChild(img);
+
+          const res = aboutPixiApp.renderer.resolution;
+          const feather = 2;
+          const maskCanvas = document.createElement("canvas");
+          maskCanvas.width = canvasSize * res;
+          maskCanvas.height = canvasSize * res;
+          const ctx = maskCanvas.getContext("2d");
+          const cx = (canvasSize / 2) * res,
+            cy = (canvasSize / 2) * res,
+            r = (visibleSize / 2) * res;
+          const grd = ctx.createRadialGradient(
+            cx,
+            cy,
+            r - feather * res,
+            cx,
+            cy,
+            r,
+          );
+          grd.addColorStop(0, "rgba(255,255,255,1)");
+          grd.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          const maskSprite = PIXI.Sprite.from(maskCanvas);
+          maskSprite.anchor.set(0.5);
+          maskSprite.x = canvasSize / 2;
+          maskSprite.y = canvasSize / 2;
+          maskSprite.scale.set(1 / res);
+          container.addChild(maskSprite);
+          maskSprite.renderable = false;
+          container.mask = maskSprite;
+
+          const displacementSprite = PIXI.Sprite.from("/noise.jpeg");
+          displacementSprite.texture.baseTexture.wrapMode =
+            PIXI.WRAP_MODES.REPEAT;
+          displacementSprite.width = canvasSize;
+          displacementSprite.height = canvasSize;
+          displacementSprite.alpha = 0;
+          aboutPixiApp.stage.addChild(displacementSprite);
+
+          const displacementFilter = new PIXI.filters.DisplacementFilter(
+            displacementSprite,
+          );
+          displacementFilter.padding = 200;
+          displacementFilter.autoFit = false;
+          container.filterArea = new PIXI.Rectangle(
+            0,
+            0,
+            canvasSize,
+            canvasSize,
+          );
+          container.filters = [displacementFilter];
+          displacementFilter.scale.set(60);
+
+          let t = 0;
+          aboutPixiApp.ticker.add(() => {
+            t += 0.01;
+            displacementSprite.x = Math.sin(t) * 60;
+            displacementSprite.y = Math.cos(t) * 60;
+          });
+
+          view.addEventListener("mouseenter", () => {
+            gsap.to(displacementFilter.scale, {
+              x: 0,
+              y: 0,
+              duration: 1,
+              ease: "power2.out",
+            });
+          });
+          view.addEventListener("mouseleave", () => {
+            gsap.to(displacementFilter.scale, {
+              x: 60,
+              y: 60,
+              duration: 1,
+              ease: "power3.out",
+            });
+          });
+
+          const waitTexture = (tex) =>
+            tex.valid
+              ? Promise.resolve()
+              : new Promise((res) => tex.once("update", res));
+          Promise.all([
+            waitTexture(img.texture),
+            waitTexture(displacementSprite.texture),
+          ]).then(() => {
+            img.width = visibleSize;
+            img.height = visibleSize;
+            aboutPixiApp.render();
+            const holder = document.getElementById("about-canvas");
+            holder.innerHTML = "";
+            holder.appendChild(view);
+            requestAnimationFrame(() => {
+              view.style.opacity = "1";
+              aboutPixiApp.start();
+            });
+          });
+        }
+
+        /* ===== Layout helpers ===== */
+        function adjustMainPadding() {
+          const navHeight = nav.offsetHeight;
+          main.style.paddingTop = navHeight + 30 + "px";
+        }
+        adjustMainPadding();
+        window.addEventListener("resize", adjustMainPadding);
+
+        let ticking = false;
+        function handlePortfolioScroll() {
+          if (!ticking) {
+            requestAnimationFrame(() => {
+              if (window.scrollY > 50) nav.classList.add("scrolled");
+              else nav.classList.remove("scrolled");
+              ticking = false;
+            });
+            ticking = true;
+          }
+        }
+
+        /* ===== Portfolio shuffle (desktop only) ===== */
+        let shuffleInterval;
+        function shuffleGallery() {
+          const gallery = document.querySelector(".gallery");
+          if (!gallery) return;
+          const items = Array.from(gallery.children);
+          const firstRects = items.map((el) => el.getBoundingClientRect());
+          for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [items[i], items[j]] = [items[j], items[i]];
+          }
+          items.forEach((el) => gallery.appendChild(el));
+          const lastRects = items.map((el) => el.getBoundingClientRect());
+          items.forEach((el, i) => {
+            const dx = firstRects[i].left - lastRects[i].left;
+            const dy = firstRects[i].top - lastRects[i].top;
+            el.style.transform = `translate(${dx}px, ${dy}px)`;
+            el.style.transition = "transform 0s";
+            requestAnimationFrame(() => {
+              el.style.transform = "translate(0,0)";
+              el.style.transition = "transform 0.8s ease";
+            });
+          });
+        }
+
+        /* ===== Router ===== */
+        async function loadPage(page) {
+          window.removeEventListener("scroll", handlePortfolioScroll);
+          setMenu(false);
+          if (page === "home") {
+            content.innerHTML = `
+              <section class="hero">
+                <h1>Alex Martínez</h1>
+                <h2 id="subtitle"></h2>
+                <div class="subscribe">
+                  <form id="subscribeForm">
+                    <input type="text" placeholder="Your name" required>
+                    <input type="email" placeholder="Your email" required>
+                    <button>Subscribe</button>
+                  </form>
+                </div>
+                <a href="https://instagram.com/debtfortunes" target="_blank" class="insta-icon"><i class="fab fa-instagram"></i></a>
+              </section>`;
+            closeMenuOnLinkClick();
+            startTypingEffect("subtitle", "Minimalist Abstract Expression");
+          }
+
+          if (page === "about") {
+            const res = await fetch("/about-data");
+            const data = await res.json();
+            content.innerHTML = `
+              <section class="about">
+                <div id="about-canvas"></div>
+                <div class="about-text">
+                  <h2>About The Artist</h2>
+                  <p>"It's no measure of health to be well adjusted to a profoundly sick society" - Jiddu Krishnamurti</p>
+                </div>
+              </section>
+              ${token ? `<div class="upload"><h3>Update About</h3><input type="file" id="aboutUpload"></div>` : ""}`;
+            closeMenuOnLinkClick();
+            initWavyImage(data.image || "https://picsum.photos/500");
+
+            if (token) {
+              document
+                .getElementById("aboutUpload")
+                .addEventListener("change", async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  await fetch("/upload/about", {
+                    method: "POST",
+                    headers: { Authorization: "Bearer " + token },
+                    body: fd,
+                  });
+                  loadPage("about");
+                });
+            }
+          }
+
+          if (page === "portfolio") {
+            const res = await fetch("/portfolio-images");
+            const gallery = await res.json();
+            content.innerHTML = `
+              <section class="portfolio-wrapper">
+                <div class="gallery">
+                  ${gallery
+                    .map((item) => {
+                      const ext = item.url.split(".").pop().toLowerCase();
+                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(
+                        ext,
+                      );
+                      return `
+                      <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
+                        ${
+                          isVideo
+                            ? `<video src="${item.url}" autoplay muted loop playsinline preload="metadata"></video>`
+                            : `<img src="${item.url}" alt="Artwork" loading="lazy">`
+                        }
+                        ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
+                      </div>`;
+                    })
+                    .join("")}
+                </div>
+                ${token ? `<div class="upload"><h3>Upload New Work</h3><input type="file" id="portfolioUpload"></div>` : ""}
+              </section>`;
+            closeMenuOnLinkClick();
+
+            const shouldShuffle = window.matchMedia(
+              "(pointer: fine) and (min-width: 601px)",
+            ).matches;
+            if (shuffleInterval) clearInterval(shuffleInterval);
+            if (shouldShuffle)
+              shuffleInterval = setInterval(shuffleGallery, 10000);
+
+            window.addEventListener("scroll", handlePortfolioScroll);
+
+            mediaItems = Array.from(
+              document.querySelectorAll(
+                ".gallery-item img, .gallery-item video",
+              ),
+            );
+            document.querySelectorAll(".gallery-item video").forEach((vid) => {
+              vid.muted = true;
+              vid.loop = true;
+              vid.playsInline = true;
+              vid.addEventListener("loadeddata", () => {
+                vid.play().catch(() => {});
+              });
+            });
+            mediaItems.forEach((el, idx) =>
+              el.addEventListener("click", () => {
+                currentIndex = idx;
+                openLightbox(el);
+              }),
+            );
+
+            if (token) {
+              document
+                .querySelectorAll(".gallery-item.admin")
+                .forEach((item) => {
+                  const btn = item.querySelector(".delete-btn");
+                  const media = item.querySelector("img, video");
+                  if (media && btn) {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+                    function runCheck() {
+                      setAdaptiveIconColor(media, btn, canvas, ctx);
+                    }
+                    if (media.tagName === "IMG") {
+                      media.addEventListener("load", runCheck);
+                      if (media.complete) runCheck();
+                    } else {
+                      media.addEventListener("loadeddata", runCheck);
+                      media.addEventListener("timeupdate", () => {
+                        if (media.currentTime % 1 < 0.1) runCheck();
+                      });
+                      if (media.readyState >= 2) runCheck();
+                    }
+                  }
+                });
+
+              document
+                .getElementById("portfolioUpload")
+                ?.addEventListener("change", async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  await fetch("/upload/portfolio", {
+                    method: "POST",
+                    headers: { Authorization: "Bearer " + token },
+                    body: fd,
+                  });
+                  loadPage("portfolio");
+                });
+
+              document
+                .querySelectorAll(".gallery-item .delete-btn")
+                .forEach((btn) => {
+                  btn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    const id = btn.parentElement.dataset.id;
+                    await fetch("/portfolio/" + id, {
+                      method: "DELETE",
+                      headers: { Authorization: "Bearer " + token },
+                    });
+                    loadPage("portfolio");
+                  });
+                });
+
+              setTimeout(() => {
+                document
+                  .querySelectorAll(".gallery-item.admin")
+                  .forEach((item) => {
+                    const btn = item.querySelector(".delete-btn");
+                    const media = item.querySelector("img, video");
+                    if (media && btn) {
+                      const canvas = document.createElement("canvas");
+                      const ctx = canvas.getContext("2d");
+                      setAdaptiveIconColor(media, btn, canvas, ctx);
+                    }
+                  });
+              }, 500);
+            }
+
+            document.querySelectorAll(".gallery-item").forEach((item, i) => {
+              item.style.animationDelay = `${i * 0.1}s`;
+            });
+          }
+
+          if (page === "contact") {
+            content.innerHTML = `
+              <div class="login-container">
+                <div class="contact-card">
+                  <h2 style="text-align:center;">Contact</h2>
+                  <form id="contactForm">
+                    <input type="text" name="name" placeholder="Your name">
+                    <input type="email" name="email" placeholder="Your email">
+                    <textarea name="message" placeholder="Message"></textarea>
+                    <button type="submit">Send</button>
+                  </form>
+                </div>
+              </div>`;
+            closeMenuOnLinkClick();
+            document
+              .getElementById("contactForm")
+              .addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                try {
+                  const res = await fetch("/contact", {
+                    method: "POST",
+                    body: formData,
+                  });
+                  if (res.ok) {
+                    alert("✅ Message sent!");
+                    e.target.reset();
+                  } else {
+                    alert("❌ Failed to send message.");
+                  }
+                } catch {
+                  alert("❌ Error sending message.");
+                }
+              });
+          }
+
+          if (page === "login") {
+            content.innerHTML = `
+              <div class="login-container">
+                <div class="login-card">
+                  <h2>Login</h2>
+                  <form id="loginForm">
+                    <input id="user" placeholder="Username">
+                    <input id="pass" type="password" placeholder="Password">
+                    <button>Login</button>
+                  </form>
+                </div>
+              </div>`;
+            closeMenuOnLinkClick();
+            document
+              .getElementById("loginForm")
+              .addEventListener("submit", (e) => {
+                e.preventDefault();
+                const u = document.getElementById("user").value;
+                const p = document.getElementById("pass").value;
+                if (u === "Martin3z" && p === "May2nd1989") {
+                  token = "valid";
+                  alert("Logged in");
+                  loadPage("home");
+                } else {
+                  alert("Invalid");
+                }
+              });
+          }
+        }
+
+        /* ===== Typing effect ===== */
+        function startTypingEffect(elementId, text, speed = 100) {
+          const el = document.getElementById(elementId);
+          if (!el) return;
+          el.textContent = "";
+          let i = 0;
+          (function typeWriter() {
+            if (i < text.length) {
+              el.textContent += text.charAt(i++);
+              setTimeout(typeWriter, speed);
+            }
+          })();
+        }
+
+        /* ===== Adaptive icon color ===== */
+        function setAdaptiveIconColor(media, btn, canvas, ctx) {
+          const size = 8;
+          canvas.width = size;
+          canvas.height = size;
+          try {
+            ctx.drawImage(media, 0, 0, size, size);
+            const d = ctx.getImageData(0, 0, size, size).data;
+            let total = 0,
+              count = 0;
+            for (let i = 0; i < d.length; i += 4) {
+              const r = d[i],
+                g = d[i + 1],
+                b = d[i + 2];
+              total += (r * 299 + g * 587 + b * 114) / 1000;
+              count++;
+            }
+            const avg = total / count;
+            const color = avg < 128 ? "#fff" : "#000";
+            const shadow =
+              avg < 128
+                ? "0 0 6px rgba(0,0,0,0.8)"
+                : "0 0 6px rgba(255,255,255,0.8)";
+            if (btn) {
+              btn.style.color = color;
+              btn.style.textShadow = shadow;
+            }
+            closeBtn.style.color = color;
+            closeBtn.style.textShadow = shadow;
+          } catch (e) {
+            /* cross-origin media may block drawImage */
+          }
+        }
+
+        /* ===== Lightbox ===== */
+        function openLightbox(el) {
+          lightboxContent.innerHTML = "";
+          let media;
+          if (el.tagName === "VIDEO") {
+            media = document.createElement("video");
+            media.src = el.src;
+            media.controls = true;
+            media.autoplay = true;
+            media.playsInline = true;
+            media.muted = false;
+          } else {
+            media = document.createElement("img");
+            media.src = el.src;
+          }
+          lightboxContent.appendChild(media);
+          lightbox.classList.add("active");
+
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          const runCheck = () => setAdaptiveIconColor(media, null, canvas, ctx);
+          if (media.tagName === "IMG") {
+            media.addEventListener("load", runCheck);
+            if (media.complete) runCheck();
+          } else {
+            media.addEventListener("loadeddata", runCheck);
+            if (media.readyState >= 2) runCheck();
+          }
+        }
+
+        closeBtn.addEventListener("click", () => {
+          lightbox.classList.remove("active");
+          lightboxContent.innerHTML = "";
+        });
+        prevBtn.addEventListener("click", () => {
+          if (mediaItems.length) {
+            currentIndex =
+              (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+            openLightbox(mediaItems[currentIndex]);
+          }
+        });
+        nextBtn.addEventListener("click", () => {
+          if (mediaItems.length) {
+            currentIndex = (currentIndex + 1) % mediaItems.length;
+            openLightbox(mediaItems[currentIndex]);
+          }
+        });
+        document.addEventListener("keydown", (e) => {
+          if (!lightbox.classList.contains("active")) return;
+          if (e.key === "Escape") {
+            lightbox.classList.remove("active");
+            lightboxContent.innerHTML = "";
+          }
+          if (e.key === "ArrowLeft") {
+            currentIndex =
+              (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+            openLightbox(mediaItems[currentIndex]);
+          }
+          if (e.key === "ArrowRight") {
+            currentIndex = (currentIndex + 1) % mediaItems.length;
+            openLightbox(mediaItems[currentIndex]);
+          }
+        });
+
+        /* Boot */
+        loadPage("home");
+        window.loadPage = loadPage;
+      });
+    </script>
+  </body>
+</html>
