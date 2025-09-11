@@ -70,6 +70,11 @@
         cursor: pointer;
       }
 
+      /* nav strong {
+        color: white; 
+        text-shadow: 0 2px 6px black;
+      } */
+
       /* Hamburger (hidden >700px) */
       .nav-toggle {
         display: none;
@@ -341,7 +346,6 @@
           padding: 0 1rem;
         }
 
-
         .gallery-item {
           margin-bottom: 1rem;
         }
@@ -352,7 +356,6 @@
           transform: none;
           box-shadow: none;
         }
-
 
         /* Respect reduced motion on mobile */
         @media (prefers-reduced-motion: reduce) {
@@ -495,6 +498,18 @@
           transform: translateY(0);
         }
       }
+
+      #loginBtn,
+      #pillLoginBtn {
+        display: none !important;
+      }
+
+      /* show only when owner mode is active */
+      .owner-mode #loginBtn,
+      .owner-mode #pillLoginBtn {
+        display: inline-block !important;
+      }
+
       .login-card,
       .contact-card {
         border: 1px solid #ddd;
@@ -603,17 +618,21 @@
         -webkit-backdrop-filter: blur(20px);
         border-radius: 28px;
         padding: 8px 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                    0 2px 8px rgba(0, 0, 0, 0.05);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.1),
+          0 2px 8px rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.2);
         pointer-events: auto;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
       }
 
       .floating-nav-pill:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
-                    0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow:
+          0 12px 40px rgba(0, 0, 0, 0.15),
+          0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
       .floating-nav-item {
@@ -747,7 +766,7 @@
   </head>
   <body>
     <nav>
-      <strong>Alex Martínez</strong>
+      <!-- <strong>Alex Martínez</strong> -->
 
       <!-- Hamburger (mobile) -->
       <button
@@ -762,12 +781,12 @@
 
       <ul id="primary-menu">
         <li><a onclick="loadPage('home')">Home</a></li>
-        <li><a onclick="loadPage('about')">About</a></li>
         <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
+        <li><a onclick="loadPage('about')">About</a></li>
         <li><a onclick="loadPage('contact')">Contact</a></li>
         <li>
           <a id="loginBtn" onclick="loadPage('login')">Login</a>
-          <a id="logoutBtn" onclick="logout()" style="display: none;">Logout</a>
+          <a id="logoutBtn" onclick="logout()" style="display: none">Logout</a>
         </li>
       </ul>
     </nav>
@@ -788,27 +807,53 @@
     <div class="floating-nav">
       <div class="floating-nav-pill">
         <div class="floating-nav-active-bg"></div>
-        <a class="floating-nav-item" onclick="loadPage('home')" data-page="home">
+        <a
+          class="floating-nav-item"
+          onclick="loadPage('home')"
+          data-page="home"
+        >
           <i class="fas fa-home fa-fw"></i>
         </a>
-        <a class="floating-nav-item" onclick="loadPage('portfolio')" data-page="portfolio">
+        <a
+          class="floating-nav-item"
+          onclick="loadPage('portfolio')"
+          data-page="portfolio"
+        >
           <i class="fas fa-th-large fa-fw"></i>
         </a>
-        <a class="floating-nav-item" onclick="loadPage('about')" data-page="about">
+        <a
+          class="floating-nav-item"
+          onclick="loadPage('about')"
+          data-page="about"
+        >
           <i class="fas fa-user fa-fw"></i>
         </a>
         <div class="floating-nav-overflow floating-nav-item">
           <i class="fas fa-ellipsis-h fa-fw"></i>
           <div class="floating-nav-overflow-menu">
-            <a class="floating-nav-overflow-item" onclick="loadPage('contact')" data-page="contact">
+            <a
+              class="floating-nav-overflow-item"
+              onclick="loadPage('contact')"
+              data-page="contact"
+            >
               <i class="fas fa-envelope"></i>
               <span>Contact</span>
             </a>
-            <a class="floating-nav-overflow-item" id="pillLoginBtn" onclick="loadPage('login')" data-page="login">
+            <a
+              class="floating-nav-overflow-item"
+              id="pillLoginBtn"
+              onclick="loadPage('login')"
+              data-page="login"
+            >
               <i class="fas fa-sign-in-alt"></i>
               <span>Login</span>
             </a>
-            <a class="floating-nav-overflow-item" id="pillLogoutBtn" onclick="logout()" style="display: none;">
+            <a
+              class="floating-nav-overflow-item"
+              id="pillLogoutBtn"
+              onclick="logout()"
+              style="display: none"
+            >
               <i class="fas fa-sign-out-alt"></i>
               <span>Logout</span>
             </a>
@@ -821,6 +866,38 @@
       document.addEventListener("DOMContentLoaded", () => {
         // Initialize token from localStorage
         let token = localStorage.getItem("adminToken");
+
+        // NEW: owner mode flag
+        let ownerMode = localStorage.getItem("ownerMode") === "1";
+
+        // NEW: enable owner mode via secret query ?admin=1
+        const params = new URLSearchParams(location.search);
+        if (params.get("admin") === "1") {
+          ownerMode = true;
+          localStorage.setItem("ownerMode", "1");
+          params.delete("admin");
+          history.replaceState(
+            {},
+            "",
+            location.pathname +
+              (params.toString() ? "?" + params : "") +
+              location.hash,
+          );
+        }
+
+        // Toggle owner mode with Cmd+Shift+A on Mac (also supports Alt+Shift+A)
+        window.addEventListener("keydown", (e) => {
+          const keyA = e.key && e.key.toLowerCase() === "a";
+          const cmdShiftA = e.metaKey && e.shiftKey && keyA; // Cmd = meta on Mac
+          const altShiftA = e.altKey && e.shiftKey && keyA; // optional backup
+
+          if (cmdShiftA || altShiftA) {
+            e.preventDefault(); // try to stop the browser's own shortcut
+            ownerMode = !ownerMode;
+            localStorage.setItem("ownerMode", ownerMode ? "1" : "0");
+            updateNavigation();
+          }
+        });
 
         const content = document.getElementById("content");
         const lightbox = document.getElementById("lightbox");
@@ -999,8 +1076,9 @@
         adjustMainPadding();
         window.addEventListener("resize", adjustMainPadding);
 
+        // replace handlePortfolioScroll with a generic name
         let ticking = false;
-        function handlePortfolioScroll() {
+        function handleScroll() {
           if (!ticking) {
             requestAnimationFrame(() => {
               if (window.scrollY > 50) nav.classList.add("scrolled");
@@ -1038,9 +1116,6 @@
 
         /* ===== Router ===== */
         async function loadPage(page) {
-          window.removeEventListener("scroll", handlePortfolioScroll);
-          // Remove scrolled class when leaving portfolio page
-          nav.classList.remove("scrolled");
           setMenu(false);
           if (page === "home") {
             content.innerHTML = `
@@ -1128,8 +1203,6 @@
             if (shouldShuffle)
               shuffleInterval = setInterval(shuffleGallery, 10000);
 
-            window.addEventListener("scroll", handlePortfolioScroll);
-
             mediaItems = Array.from(
               document.querySelectorAll(
                 ".gallery-item img, .gallery-item video",
@@ -1188,12 +1261,15 @@
                       headers: { Authorization: "Bearer " + token },
                       body: fd,
                     });
-                    
+
                     const result = await response.json();
                     if (response.ok) {
                       loadPage("portfolio");
                     } else {
-                      alert("❌ Upload failed: " + (result.error || "Unknown error"));
+                      alert(
+                        "❌ Upload failed: " +
+                          (result.error || "Unknown error"),
+                      );
                       if (response.status === 401) {
                         localStorage.removeItem("adminToken");
                         token = null;
@@ -1217,12 +1293,15 @@
                         method: "DELETE",
                         headers: { Authorization: "Bearer " + token },
                       });
-                      
+
                       const result = await response.json();
                       if (response.ok) {
                         loadPage("portfolio");
                       } else {
-                        alert("❌ Delete failed: " + (result.error || "Unknown error"));
+                        alert(
+                          "❌ Delete failed: " +
+                            (result.error || "Unknown error"),
+                        );
                         if (response.status === 401) {
                           localStorage.removeItem("adminToken");
                           token = null;
@@ -1280,15 +1359,15 @@
                     method: "POST",
                     body: formData,
                   });
-                  
+
                   const data = await res.json();
                   if (res.ok) {
                     alert("✅ " + (data.message || "Message sent!"));
                     e.target.reset();
                   } else {
-                    const errorMsg = data.errors ? 
-                      data.errors.map(err => err.msg).join(", ") : 
-                      (data.error || "Failed to send message");
+                    const errorMsg = data.errors
+                      ? data.errors.map((err) => err.msg).join(", ")
+                      : data.error || "Failed to send message";
                     alert("❌ " + errorMsg);
                   }
                 } catch (error) {
@@ -1317,7 +1396,7 @@
                 e.preventDefault();
                 const username = document.getElementById("user").value;
                 const password = document.getElementById("pass").value;
-                
+
                 try {
                   const response = await fetch("/login", {
                     method: "POST",
@@ -1326,9 +1405,9 @@
                     },
                     body: JSON.stringify({ username, password }),
                   });
-                  
+
                   const data = await response.json();
-                  
+
                   if (response.ok) {
                     token = data.token;
                     localStorage.setItem("adminToken", token);
@@ -1374,19 +1453,20 @@
           const pillLoginBtn = document.getElementById("pillLoginBtn");
           const pillLogoutBtn = document.getElementById("pillLogoutBtn");
 
-          if (token) {
-            // Admin is logged in - show logout, hide login
-            if (loginBtn) loginBtn.style.display = "none";
-            if (logoutBtn) logoutBtn.style.display = "block";
-            if (pillLoginBtn) pillLoginBtn.style.display = "none";
-            if (pillLogoutBtn) pillLogoutBtn.style.display = "block";
-          } else {
-            // Admin is not logged in - show login, hide logout
-            if (loginBtn) loginBtn.style.display = "block";
-            if (logoutBtn) logoutBtn.style.display = "none";
-            if (pillLoginBtn) pillLoginBtn.style.display = "block";
-            if (pillLogoutBtn) pillLogoutBtn.style.display = "none";
-          }
+          // flip body class so CSS can override the !important hide
+          document.body.classList.toggle("owner-mode", ownerMode);
+
+          const showLogin = ownerMode && !token; // only you + not logged in
+          const showLogout = !!token; // logged in
+
+          if (loginBtn) loginBtn.style.display = showLogin ? "block" : "none";
+          if (pillLoginBtn)
+            pillLoginBtn.style.display = showLogin ? "block" : "none";
+
+          if (logoutBtn)
+            logoutBtn.style.display = showLogout ? "block" : "none";
+          if (pillLogoutBtn)
+            pillLogoutBtn.style.display = showLogout ? "block" : "none";
         }
 
         /* ===== Typing effect ===== */
@@ -1506,12 +1586,17 @@
           const swipeRestraint = 100; // Maximum vertical movement allowed
           const deltaX = touchEndX - touchStartX;
           const deltaY = Math.abs(touchEndY - touchStartY);
-          
+
           // Only trigger swipe if horizontal movement is significant and vertical movement is minimal
-          if (Math.abs(deltaX) >= swipeThreshold && deltaY <= swipeRestraint && mediaItems.length > 1) {
+          if (
+            Math.abs(deltaX) >= swipeThreshold &&
+            deltaY <= swipeRestraint &&
+            mediaItems.length > 1
+          ) {
             if (deltaX > 0) {
               // Swipe right - go to previous image
-              currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+              currentIndex =
+                (currentIndex - 1 + mediaItems.length) % mediaItems.length;
               openLightbox(mediaItems[currentIndex]);
             } else {
               // Swipe left - go to next image
@@ -1522,8 +1607,12 @@
         }
 
         // Add touch event listeners to lightbox
-        lightbox.addEventListener("touchstart", handleTouchStart, { passive: true });
-        lightbox.addEventListener("touchend", handleTouchEnd, { passive: true });
+        lightbox.addEventListener("touchstart", handleTouchStart, {
+          passive: true,
+        });
+        lightbox.addEventListener("touchend", handleTouchEnd, {
+          passive: true,
+        });
         document.addEventListener("keydown", (e) => {
           if (!lightbox.classList.contains("active")) return;
           if (e.key === "Escape") {
@@ -1543,55 +1632,63 @@
 
         /* ===== Floating Navigation ===== */
         function initFloatingNav() {
-          const floatingNav = document.querySelector('.floating-nav');
-          const navItems = document.querySelectorAll('.floating-nav-item:not(.floating-nav-overflow)');
-          const activeBg = document.querySelector('.floating-nav-active-bg');
-          const overflowBtn = document.querySelector('.floating-nav-overflow');
-          const overflowMenu = document.querySelector('.floating-nav-overflow-menu');
-          
+          const floatingNav = document.querySelector(".floating-nav");
+          const navItems = document.querySelectorAll(
+            ".floating-nav-item:not(.floating-nav-overflow)",
+          );
+          const activeBg = document.querySelector(".floating-nav-active-bg");
+          const overflowBtn = document.querySelector(".floating-nav-overflow");
+          const overflowMenu = document.querySelector(
+            ".floating-nav-overflow-menu",
+          );
+
           if (!floatingNav) return;
-          
+
           // Move active background to specific item
           function moveActiveBgTo(activeItem) {
-            const pill = document.querySelector('.floating-nav-pill');
-            const bg = pill.querySelector('.floating-nav-active-bg');
-            const x = activeItem.offsetLeft + (activeItem.offsetWidth - bg.offsetWidth) / 2;
+            const pill = document.querySelector(".floating-nav-pill");
+            const bg = pill.querySelector(".floating-nav-active-bg");
+            const x =
+              activeItem.offsetLeft +
+              (activeItem.offsetWidth - bg.offsetWidth) / 2;
             bg.style.transform = `translateX(${Math.round(x)}px)`;
           }
 
           // Set active state and move background
           function setActiveNav(page) {
             navItems.forEach((item) => {
-              const itemPage = item.getAttribute('data-page');
+              const itemPage = item.getAttribute("data-page");
               if (itemPage === page) {
-                item.classList.add('active');
+                item.classList.add("active");
                 moveActiveBgTo(item);
               } else {
-                item.classList.remove('active');
+                item.classList.remove("active");
               }
             });
           }
 
           // Handle overflow menu
           if (overflowBtn && overflowMenu) {
-            overflowBtn.addEventListener('click', (e) => {
+            overflowBtn.addEventListener("click", (e) => {
               e.stopPropagation();
-              overflowMenu.classList.toggle('show');
+              overflowMenu.classList.toggle("show");
             });
 
             // Close overflow menu when clicking outside
-            document.addEventListener('click', (e) => {
+            document.addEventListener("click", (e) => {
               if (!overflowBtn.contains(e.target)) {
-                overflowMenu.classList.remove('show');
+                overflowMenu.classList.remove("show");
               }
             });
 
             // Close overflow menu when clicking an item
-            document.querySelectorAll('.floating-nav-overflow-item').forEach(item => {
-              item.addEventListener('click', () => {
-                overflowMenu.classList.remove('show');
+            document
+              .querySelectorAll(".floating-nav-overflow-item")
+              .forEach((item) => {
+                item.addEventListener("click", () => {
+                  overflowMenu.classList.remove("show");
+                });
               });
-            });
           }
 
           // Update active state when page changes
@@ -1600,18 +1697,22 @@
 
         // Enhance loadPage to update floating nav
         const originalLoadPage = loadPage;
-        loadPage = function(page) {
+        loadPage = function (page) {
           originalLoadPage(page);
           if (window.updateFloatingNav) {
             window.updateFloatingNav(page);
           }
         };
 
+        window.addEventListener("scroll", handleScroll, {
+          passive: true,
+        });
+        handleScroll(); // initialize state on load/restore
         /* Boot */
         initFloatingNav();
         updateNavigation(); // Set initial navigation state
         loadPage("home");
-        
+
         // Make functions globally accessible for inline onclick handlers
         window.loadPage = loadPage;
         window.logout = logout;
