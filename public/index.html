@@ -333,78 +333,26 @@
         }
       }
 
-      /* ===== MOBILE: square tiles (Instagram-style) + smooth fade ===== */
+      /* ===== MOBILE: masonry layout with 2 columns ===== */
       @media (max-width: 600px) {
         .gallery {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 0.75rem;
-
-          /* kill masonry columns just on mobile */
-          column-count: initial;
-          column-gap: 0.75rem;
-
-          /* equal left/right gutter */
-          padding-inline: 0.75rem;
-          box-sizing: border-box;
+          column-count: 2;
+          column-gap: 1rem;
+          padding: 0 1rem;
         }
 
-        /* fade-up keyframes for mobile tiles */
-        @keyframes gridFadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(8px) scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
 
         .gallery-item {
-          display: block;
-          position: relative;
-          margin: 0;
-          aspect-ratio: 1 / 1; /* squares */
-          overflow: hidden;
-          border-radius: 10px;
-          box-shadow: none;
-
-          /* smooth fade-in */
-          opacity: 0;
-          transform: translateY(8px) scale(0.98);
-          animation: gridFadeUp 3s ease forwards;
-          will-change: transform, opacity;
+          margin-bottom: 1rem;
         }
 
         /* gentle stagger so rows don’t pop all at once */
-        .gallery-item:nth-child(2n) {
-          animation-delay: 0.05s;
-        }
-        .gallery-item:nth-child(3n) {
-          animation-delay: 0.1s;
-        }
-        .gallery-item:nth-child(4n) {
-          animation-delay: 0.15s;
-        }
 
         .gallery-item:hover {
           transform: none;
           box-shadow: none;
         }
 
-        .gallery-item img,
-        .gallery-item video {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover; /* crop inside the square */
-          border-radius: 0;
-        }
-        .gallery-item video {
-          max-height: none;
-        } /* fill the square */
 
         /* Respect reduced motion on mobile */
         @media (prefers-reduced-motion: reduce) {
