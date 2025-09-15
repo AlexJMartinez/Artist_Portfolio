@@ -13,6 +13,38 @@ const sanitizeHtml = require("sanitize-html");
 // Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
 
+// Environment validation for deployment
+function validateEnvironment() {
+  const warnings = [];
+  const errors = [];
+  
+  // Check critical environment variables
+  if (!process.env.DATABASE_URL) {
+    warnings.push("DATABASE_URL not set - database features will be limited");
+  }
+  
+  if (!process.env.REPL_IDENTITY && !process.env.WEB_REPL_RENEWAL) {
+    warnings.push("No email authentication tokens found - email features will be limited");
+  }
+  
+  // Log warnings and errors
+  if (warnings.length > 0) {
+    console.warn("⚠️  Environment Configuration Warnings:");
+    warnings.forEach(warning => console.warn(`  - ${warning}`));
+  }
+  
+  if (errors.length > 0) {
+    console.error("❌ Environment Configuration Errors:");
+    errors.forEach(error => console.error(`  - ${error}`));
+    console.error("Please fix these configuration issues before deployment.");
+  }
+  
+  return { warnings, errors, hasErrors: errors.length > 0 };
+}
+
+// Run environment validation
+const envValidation = validateEnvironment();
+
 // Utility function to generate secure unsubscribe tokens
 function generateUnsubscribeToken() {
   return crypto.randomBytes(32).toString('hex');
@@ -25,10 +57,38 @@ function buildBaseUrl(req) {
   return `${protocol}://${host}`;
 }
 
-// Database setup
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+// Database setup with error handling
+let pool;
+try {
+  if (!process.env.DATABASE_URL) {
+    console.warn("DATABASE_URL not set - database features will be disabled");
+    pool = null;
+  } else {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+    
+    // Test the connection on startup
+    pool.on('error', (err) => {
+      console.error('Database connection error:', err);
+    });
+
+    // Attempt initial connection test (non-blocking)
+    pool.connect()
+      .then(client => {
+        console.log('Database connected successfully');
+        client.release();
+      })
+      .catch(err => {
+        console.error('Database connection failed on startup:', err);
+        console.warn('Database features will be limited');
+      });
+  }
+} catch (error) {
+  console.error('Error setting up database pool:', error);
+  console.warn('Database features will be disabled');
+  pool = null;
+}
 
 // Replit Mail utility function (using official integration pattern)
 async function sendEmail(message) {
@@ -39,7 +99,9 @@ async function sendEmail(message) {
     : null;
 
   if (!xReplitToken) {
-    throw new Error("No authentication token found. Please set REPL_IDENTITY or ensure you're running in Replit environment.");
+    console.warn("No authentication token found for email service. Email functionality will be limited.");
+    // Return a mock success response instead of throwing error to prevent startup failure
+    return { success: false, error: "Email service not configured", mock: true };
   }
 
   try {
@@ -287,6 +349,12 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
 
     // Send notification emails to all active subscribers
     try {
+      // Skip email notifications if database is unavailable
+      if (!pool) {
+        console.warn("Database unavailable - skipping email notifications for new portfolio item");
+        return res.json({ success: true, message: "Portfolio item uploaded successfully" });
+      }
+
       const subscribers = await pool.query(
         'SELECT name, email, unsubscribe_token FROM subscribers WHERE is_active = true'
       );
@@ -531,6 +599,14 @@ app.post(
   ],
   async (req, res) => {
     try {
+      // Check if database is available
+      if (!pool) {
+        return res.status(503).json({ 
+          success: false, 
+          error: "Database service is currently unavailable. Please try again later." 
+        });
+      }
+
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ success: false, errors: errors.array() });
@@ -617,6 +693,17 @@ app.post(
 // ---- UNSUBSCRIBE ENDPOINT ---- //
 app.get("/unsubscribe", async (req, res) => {
   try {
+    // Check if database is available
+    if (!pool) {
+      return res.status(503).send(`
+        <html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
+          <h2 style="color: #dc3545;">Service Temporarily Unavailable</h2>
+          <p>The unsubscribe service is currently unavailable. Please try again later.</p>
+          <p>If this problem persists, please contact us directly.</p>
+        </body></html>
+      `);
+    }
+
     const { token } = req.query;
     
     if (!token) {

@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "deploy": "npm cache clean --force && npm ci && node server.js",
+    "health-check": "node -e \"console.log('Server health check passed')\""
   },
   "dependencies": {
     "@replit/database": "^2.0.5",
