@@ -13,9 +13,9 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <!-- Performance: DNS prefetch for CDNs -->
-    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <style>
       body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -573,14 +573,13 @@
         z-index: 3;
         display: none;
       }
-      
+
       .gallery-item.admin .caption-edit-btn {
         display: block;
       }
-      
+
       /* Mobile specific adjustments */
       @media (max-width: 700px) {
-
         .caption-edit {
           position: static;
           opacity: 1;
@@ -593,7 +592,7 @@
           display: block;
         }
       }
-      
+
       /* Desktop: Show caption edit in overlay */
       @media (min-width: 701px) {
         .gallery-item.admin.editing-caption .caption-edit {
@@ -1240,12 +1239,13 @@
         /* ===== Dynamic Library Loading ===== */
         let gsapLoaded = false;
         let pixiLoaded = false;
-        
+
         async function loadGSAP() {
           if (gsapLoaded || window.gsap) return;
           return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js';
+            const script = document.createElement("script");
+            script.src =
+              "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js";
             script.onload = () => {
               gsapLoaded = true;
               resolve();
@@ -1254,12 +1254,13 @@
             document.head.appendChild(script);
           });
         }
-        
+
         async function loadPIXI() {
           if (pixiLoaded || window.PIXI) return;
           return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js';
+            const script = document.createElement("script");
+            script.src =
+              "https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js";
             script.onload = () => {
               pixiLoaded = true;
               resolve();
@@ -1274,7 +1275,7 @@
         async function initWavyImage(imageUrl) {
           // Load PIXI and GSAP dynamically only when needed
           await Promise.all([loadPIXI(), loadGSAP()]);
-          
+
           if (aboutPixiApp) {
             aboutPixiApp.destroy(true, {
               children: true,
@@ -1491,27 +1492,31 @@
             </section>`;
             closeMenuOnLinkClick();
             startTypingEffect("subtitle", "Minimalist Abstract Expression");
-            
+
             // Add subscribe form event listener
             const subscribeForm = document.getElementById("subscribeForm");
             if (subscribeForm) {
               subscribeForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
-                
+
                 const formData = new FormData(subscribeForm);
-                const name = subscribeForm.querySelector('input[type="text"]').value.trim();
-                const email = subscribeForm.querySelector('input[type="email"]').value.trim();
-                
+                const name = subscribeForm
+                  .querySelector('input[type="text"]')
+                  .value.trim();
+                const email = subscribeForm
+                  .querySelector('input[type="email"]')
+                  .value.trim();
+
                 if (!name || !email) {
                   alert("Please fill in both name and email.");
                   return;
                 }
-                
+
                 const button = subscribeForm.querySelector("button");
                 const originalText = button.textContent;
                 button.textContent = "Subscribing...";
                 button.disabled = true;
-                
+
                 try {
                   const response = await fetch("/subscribe", {
                     method: "POST",
@@ -1520,9 +1525,9 @@
                     },
                     body: JSON.stringify({ name, email }),
                   });
-                  
+
                   const result = await response.json();
-                  
+
                   if (result.success) {
                     alert("🎉 " + result.message);
                     subscribeForm.reset();
@@ -1638,6 +1643,12 @@
                   <a class="tool" href="" target="_blank" rel="noopener">
                     <img src="/logos/Figma.jpeg" alt="Font Awesome" loading="lazy">
                   </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Runway.png" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Midjourney.png" alt="Font Awesome" loading="lazy">
+                  </a>
                   <!-- Add more tiles by repeating the <a class="tool"> … </a> block -->
                 </div>
                 <!-- GRID 2 -->
@@ -1682,6 +1693,9 @@
                     <a class="tool" href="" target="_blank" rel="noopener">
                       <img src="/logos_corp/Make.png" alt="Font Awesome" loading="lazy">
                     </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Google.png" alt="Font Awesome" loading="lazy">
+                    </a>
                     <!-- add more corporate apps as needed -->
                   </div>
                 </div>
@@ -1709,7 +1723,9 @@
                             : `<img src="${item.url}" alt="Artwork" loading="lazy" decoding="async">`
                         }
                         ${item.caption ? `<div class="caption"></div>` : ""}
-                        ${token ? `
+                        ${
+                          token
+                            ? `
                           <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
                           <button class="caption-edit-btn">Edit Caption</button>
                           <div class="caption-edit">
@@ -1719,7 +1735,9 @@
                               <button class="cancel-btn">Cancel</button>
                             </div>
                           </div>
-                        ` : ""}
+                        `
+                            : ""
+                        }
                       </div>`;
                     })
                     .join("")}
@@ -1730,24 +1748,28 @@
 
             // Safely set caption text content and textarea values to prevent XSS
             gallery.forEach((item, index) => {
-              const galleryItem = document.querySelector(`[data-id="${item.id}"]`);
+              const galleryItem = document.querySelector(
+                `[data-id="${item.id}"]`,
+              );
               if (galleryItem && item.caption) {
-                const captionEl = galleryItem.querySelector('.caption');
+                const captionEl = galleryItem.querySelector(".caption");
                 if (captionEl) {
                   captionEl.textContent = item.caption; // Safe text setting
                 }
-                const textarea = galleryItem.querySelector('.caption-edit textarea');
+                const textarea = galleryItem.querySelector(
+                  ".caption-edit textarea",
+                );
                 if (textarea) {
                   textarea.value = item.caption; // Safe value setting
-                  textarea.setAttribute('data-original-caption', item.caption);
+                  textarea.setAttribute("data-original-caption", item.caption);
                 }
               }
             });
 
             const isAdmin = !!token; // Check if admin is logged in
-            const shouldShuffle = window.matchMedia(
-              "(pointer: fine) and (min-width: 601px)",
-            ).matches && !isAdmin; // Disable shuffle when admin is logged in
+            const shouldShuffle =
+              window.matchMedia("(pointer: fine) and (min-width: 601px)")
+                .matches && !isAdmin; // Disable shuffle when admin is logged in
             if (shuffleInterval) clearInterval(shuffleInterval);
             if (shouldShuffle)
               shuffleInterval = setInterval(shuffleGallery, 10000);
@@ -1758,23 +1780,30 @@
               ),
             );
             // Setup Intersection Observer for lazy video loading
-            const videoObserver = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                  const vid = entry.target;
-                  vid.muted = true;
-                  vid.loop = true;
-                  vid.playsInline = true;
-                  vid.load(); // Start loading the video
-                  vid.addEventListener("loadeddata", () => {
-                    vid.play().catch(() => {});
-                  }, { once: true });
-                  videoObserver.unobserve(vid); // Stop observing once loaded
-                }
-              });
-            }, { 
-              rootMargin: '50px' // Start loading 50px before the video enters viewport
-            });
+            const videoObserver = new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting) {
+                    const vid = entry.target;
+                    vid.muted = true;
+                    vid.loop = true;
+                    vid.playsInline = true;
+                    vid.load(); // Start loading the video
+                    vid.addEventListener(
+                      "loadeddata",
+                      () => {
+                        vid.play().catch(() => {});
+                      },
+                      { once: true },
+                    );
+                    videoObserver.unobserve(vid); // Stop observing once loaded
+                  }
+                });
+              },
+              {
+                rootMargin: "50px", // Start loading 50px before the video enters viewport
+              },
+            );
 
             document.querySelectorAll(".gallery-item video").forEach((vid) => {
               videoObserver.observe(vid);
@@ -1893,36 +1922,44 @@
                     try {
                       const response = await fetch(`/portfolio/${id}/caption`, {
                         method: "PATCH",
-                        headers: { 
-                          "Authorization": "Bearer " + token,
-                          "Content-Type": "application/json"
+                        headers: {
+                          Authorization: "Bearer " + token,
+                          "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ caption })
+                        body: JSON.stringify({ caption }),
                       });
                       const result = await response.json();
                       if (result.success) {
                         // Use the sanitized caption from server response
                         const sanitizedCaption = result.caption || "";
-                        
+
                         // Update caption display safely without reload
-                        const captionElement = galleryItem.querySelector('.caption');
+                        const captionElement =
+                          galleryItem.querySelector(".caption");
                         if (sanitizedCaption) {
                           if (!captionElement) {
-                            const newCaption = document.createElement('div');
-                            newCaption.className = 'caption';
+                            const newCaption = document.createElement("div");
+                            newCaption.className = "caption";
                             galleryItem.appendChild(newCaption);
                           }
-                          galleryItem.querySelector('.caption').textContent = sanitizedCaption;
+                          galleryItem.querySelector(".caption").textContent =
+                            sanitizedCaption;
                         } else if (captionElement) {
                           captionElement.remove();
                         }
-                        
+
                         // Update textarea original value to sanitized version
-                        textarea.setAttribute('data-original-caption', sanitizedCaption);
+                        textarea.setAttribute(
+                          "data-original-caption",
+                          sanitizedCaption,
+                        );
                         textarea.value = sanitizedCaption;
-                        galleryItem.classList.remove('editing-caption');
+                        galleryItem.classList.remove("editing-caption");
                       } else {
-                        alert("❌ Caption update failed: " + (result.error || "Unknown error"));
+                        alert(
+                          "❌ Caption update failed: " +
+                            (result.error || "Unknown error"),
+                        );
                         if (response.status === 401) {
                           localStorage.removeItem("adminToken");
                           token = null;
@@ -1944,10 +1981,11 @@
                     const captionEdit = cancelBtn.closest(".caption-edit");
                     const textarea = captionEdit.querySelector("textarea");
                     const galleryItem = captionEdit.closest(".gallery-item");
-                    
+
                     // Reset to original caption from data attribute
-                    textarea.value = textarea.getAttribute('data-original-caption') || "";
-                    galleryItem.classList.remove('editing-caption');
+                    textarea.value =
+                      textarea.getAttribute("data-original-caption") || "";
+                    galleryItem.classList.remove("editing-caption");
                   });
                 });
 
@@ -1958,7 +1996,7 @@
                   editBtn.addEventListener("click", (e) => {
                     e.stopPropagation();
                     const galleryItem = editBtn.closest(".gallery-item");
-                    galleryItem.classList.toggle('editing-caption');
+                    galleryItem.classList.toggle("editing-caption");
                   });
                 });
 
