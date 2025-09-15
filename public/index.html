@@ -494,10 +494,147 @@
         justify-content: center;
         color: #000;
         cursor: pointer;
-        z-index: 2;
+        z-index: 15;
       }
       .gallery-item.admin .delete-btn {
         display: block;
+      }
+
+      /* Caption styles */
+      .gallery-item .caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        color: white;
+        padding: 20px 12px 12px;
+        font-size: 0.85rem;
+        line-height: 1.3;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .gallery-item:hover .caption,
+      .gallery-item.show-caption .caption {
+        opacity: 1;
+      }
+
+      /* Mobile: Always show captions if they exist */
+      @media (max-width: 700px) {
+        .gallery-item .caption {
+          opacity: 1;
+          position: static;
+          background: rgba(0, 0, 0, 0.8);
+          margin-top: 8px;
+          padding: 8px;
+          border-radius: 4px;
+        }
+      }
+
+      /* Admin caption editing */
+      .caption-edit {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 6px;
+        padding: 6px;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 5;
+        pointer-events: none;
+      }
+
+      .gallery-item.admin:hover .caption-edit,
+      .gallery-item.admin.editing-caption .caption-edit {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      /* Mobile: Add edit caption button */
+      @media (max-width: 700px) {
+        .caption-edit-btn {
+          position: absolute;
+          bottom: 40px;
+          right: 6px;
+          background: rgba(255, 255, 255, 0.9);
+          border: 1px solid rgba(0, 0, 0, 0.2);
+          border-radius: 4px;
+          padding: 6px 8px;
+          font-size: 0.75rem;
+          cursor: pointer;
+          z-index: 3;
+          display: none;
+        }
+        
+        .gallery-item.admin .caption-edit-btn {
+          display: block;
+        }
+
+        .caption-edit {
+          position: static;
+          opacity: 1;
+          transform: none;
+          margin-top: 8px;
+          display: none;
+        }
+
+        .gallery-item.admin.editing-caption .caption-edit {
+          display: block;
+        }
+      }
+
+      .caption-edit textarea {
+        width: 100%;
+        min-height: 50px;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        padding: 6px;
+        font-size: 0.8rem;
+        resize: vertical;
+        background: white;
+        font-family: inherit;
+      }
+
+      .caption-edit .caption-buttons {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .caption-edit button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .caption-edit .save-btn {
+        background: #28a745;
+        color: white;
+      }
+
+      .caption-edit .save-btn:hover {
+        background: #218838;
+      }
+
+      .caption-edit .cancel-btn {
+        background: #6c757d;
+        color: white;
+      }
+
+      .caption-edit .cancel-btn:hover {
+        background: #5a6268;
       }
 
       /* ===== LIGHTBOX ===== */
@@ -1334,6 +1471,10 @@
                    target="_blank" rel="noopener" aria-label="LinkedIn">
                   <i class="fab fa-linkedin-in"></i>
                 </a>
+                <a class="social-link" href="https://github.com/AlexJMartinez"
+                   target="_blank" rel="noopener" aria-label="GitHub">
+                  <i class="fab fa-github"></i>
+                </a>
               </div>
             </section>`;
             closeMenuOnLinkClick();
@@ -1555,7 +1696,18 @@
                             ? `<video src="${item.url}" muted loop playsinline preload="none" loading="lazy"></video>`
                             : `<img src="${item.url}" alt="Artwork" loading="lazy" decoding="async">`
                         }
-                        ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
+                        ${item.caption ? `<div class="caption"></div>` : ""}
+                        ${token ? `
+                          <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                          <button class="caption-edit-btn">Edit Caption</button>
+                          <div class="caption-edit">
+                            <textarea placeholder="Add a caption..." maxlength="500"></textarea>
+                            <div class="caption-buttons">
+                              <button class="save-btn">Save</button>
+                              <button class="cancel-btn">Cancel</button>
+                            </div>
+                          </div>
+                        ` : ""}
                       </div>`;
                     })
                     .join("")}
@@ -1563,6 +1715,22 @@
                 ${token ? `<div class="upload"><h3>Upload New Work</h3><input type="file" id="portfolioUpload"></div>` : ""}
               </section>`;
             closeMenuOnLinkClick();
+
+            // Safely set caption text content and textarea values to prevent XSS
+            gallery.forEach((item, index) => {
+              const galleryItem = document.querySelector(`[data-id="${item.id}"]`);
+              if (galleryItem && item.caption) {
+                const captionEl = galleryItem.querySelector('.caption');
+                if (captionEl) {
+                  captionEl.textContent = item.caption; // Safe text setting
+                }
+                const textarea = galleryItem.querySelector('.caption-edit textarea');
+                if (textarea) {
+                  textarea.value = item.caption; // Safe value setting
+                  textarea.setAttribute('data-original-caption', item.caption);
+                }
+              }
+            });
 
             const shouldShuffle = window.matchMedia(
               "(pointer: fine) and (min-width: 601px)",
@@ -1694,6 +1862,90 @@
                       console.error("Delete error:", error);
                       alert("❌ Delete failed. Please try again.");
                     }
+                  });
+                });
+
+              // Caption editing functionality
+              document
+                .querySelectorAll(".caption-edit .save-btn")
+                .forEach((saveBtn) => {
+                  saveBtn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    const captionEdit = saveBtn.closest(".caption-edit");
+                    const textarea = captionEdit.querySelector("textarea");
+                    const galleryItem = captionEdit.closest(".gallery-item");
+                    const id = galleryItem.dataset.id;
+                    const caption = textarea.value.trim();
+
+                    try {
+                      const response = await fetch(`/portfolio/${id}/caption`, {
+                        method: "PATCH",
+                        headers: { 
+                          "Authorization": "Bearer " + token,
+                          "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ caption })
+                      });
+                      const result = await response.json();
+                      if (result.success) {
+                        // Use the sanitized caption from server response
+                        const sanitizedCaption = result.caption || "";
+                        
+                        // Update caption display safely without reload
+                        const captionElement = galleryItem.querySelector('.caption');
+                        if (sanitizedCaption) {
+                          if (!captionElement) {
+                            const newCaption = document.createElement('div');
+                            newCaption.className = 'caption';
+                            galleryItem.appendChild(newCaption);
+                          }
+                          galleryItem.querySelector('.caption').textContent = sanitizedCaption;
+                        } else if (captionElement) {
+                          captionElement.remove();
+                        }
+                        
+                        // Update textarea original value to sanitized version
+                        textarea.setAttribute('data-original-caption', sanitizedCaption);
+                        textarea.value = sanitizedCaption;
+                        galleryItem.classList.remove('editing-caption');
+                      } else {
+                        alert("❌ Caption update failed: " + (result.error || "Unknown error"));
+                        if (response.status === 401) {
+                          localStorage.removeItem("adminToken");
+                          token = null;
+                          loadPage("login");
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Caption update error:", error);
+                      alert("❌ Caption update failed. Please try again.");
+                    }
+                  });
+                });
+
+              document
+                .querySelectorAll(".caption-edit .cancel-btn")
+                .forEach((cancelBtn) => {
+                  cancelBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const captionEdit = cancelBtn.closest(".caption-edit");
+                    const textarea = captionEdit.querySelector("textarea");
+                    const galleryItem = captionEdit.closest(".gallery-item");
+                    
+                    // Reset to original caption from data attribute
+                    textarea.value = textarea.getAttribute('data-original-caption') || "";
+                    galleryItem.classList.remove('editing-caption');
+                  });
+                });
+
+              // Mobile caption edit button functionality
+              document
+                .querySelectorAll(".caption-edit-btn")
+                .forEach((editBtn) => {
+                  editBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const galleryItem = editBtn.closest(".gallery-item");
+                    galleryItem.classList.toggle('editing-caption');
                   });
                 });
 

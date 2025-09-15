@@ -9,6 +9,7 @@ const { body, validationResult } = require("express-validator");
 const { Pool } = require("pg");
 const crypto = require("crypto");
 const compression = require("compression");
+const sanitizeHtml = require("sanitize-html");
 // Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
 
@@ -278,6 +279,7 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
       url: `/uploads/portfolio/${req.file.filename}`,
       uploadedAt: new Date().toISOString(),
       fileType: req.file.mimetype,
+      caption: "",
     };
 
     portfolio.push(newItem);
@@ -362,6 +364,47 @@ app.get("/portfolio-images", (req, res) => {
   } catch (error) {
     console.error("Portfolio images error:", error);
     res.status(500).json({ error: "Failed to load portfolio images" });
+  }
+});
+
+// Update portfolio caption
+app.patch("/portfolio/:id/caption", auth, [
+  body("caption").isString().isLength({ max: 500 }).withMessage("Caption must be a string with maximum 500 characters")
+], (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array()[0].msg });
+    }
+
+    if (!fs.existsSync(portfolioFile)) {
+      return res.status(404).json({ error: "Portfolio file not found" });
+    }
+
+    const portfolio = JSON.parse(fs.readFileSync(portfolioFile, "utf8"));
+    const itemIndex = portfolio.findIndex(item => item.id === parseInt(req.params.id));
+    
+    if (itemIndex === -1) {
+      return res.status(404).json({ error: "Portfolio item not found" });
+    }
+
+    // Sanitize caption to prevent XSS
+    const sanitizedCaption = sanitizeHtml(req.body.caption.trim(), {
+      allowedTags: [], // No HTML tags allowed
+      allowedAttributes: {}
+    });
+    
+    portfolio[itemIndex].caption = sanitizedCaption;
+    fs.writeFileSync(portfolioFile, JSON.stringify(portfolio, null, 2));
+    
+    res.json({ 
+      success: true, 
+      message: "Caption updated successfully",
+      caption: sanitizedCaption 
+    });
+  } catch (error) {
+    console.error("Caption update error:", error);
+    res.status(500).json({ error: "Failed to update caption" });
   }
 });
 
