@@ -5,6 +5,10 @@ modules = ["nodejs-20", "postgresql-16"]
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 41363
+externalPort = 3001
+
 [agent]
 expertMode = true
 integrations = ["replitmail:1.0.0"]

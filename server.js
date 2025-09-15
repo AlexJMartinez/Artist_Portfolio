@@ -6,7 +6,72 @@ const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
+const { Pool } = require("pg");
+const crypto = require("crypto");
+// Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
+
+// Utility function to generate secure unsubscribe tokens
+function generateUnsubscribeToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Utility function to build URLs based on request
+function buildBaseUrl(req) {
+  const protocol = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers.host || req.headers['x-forwarded-host'] || 'localhost:5000';
+  return `${protocol}://${host}`;
+}
+
+// Database setup
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+// Replit Mail utility function (using official integration pattern)
+async function sendEmail(message) {
+  const xReplitToken = process.env.REPL_IDENTITY
+    ? "repl " + process.env.REPL_IDENTITY
+    : process.env.WEB_REPL_RENEWAL
+    ? "depl " + process.env.WEB_REPL_RENEWAL
+    : null;
+
+  if (!xReplitToken) {
+    throw new Error("No authentication token found. Please set REPL_IDENTITY or ensure you're running in Replit environment.");
+  }
+
+  try {
+    const response = await fetch(
+      "https://connectors.replit.com/api/v2/mailer/send",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X_REPLIT_TOKEN": xReplitToken,
+        },
+        body: JSON.stringify({
+          to: message.to,
+          cc: message.cc,
+          subject: message.subject,
+          text: message.text,
+          html: message.html,
+          attachments: message.attachments,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Replit Mail API error:', response.status, error);
+      throw new Error(error.message || "Failed to send email");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('SendEmail error:', error);
+    throw error;
+  }
+}
 
 const app = express();
 app.use(express.json());
@@ -194,7 +259,7 @@ app.get("/about-data", (req, res) => {
 // ---- PORTFOLIO ---- //
 const portfolioFile = path.join(__dirname, "uploads", "portfolio.json");
 
-app.post("/upload/portfolio", auth, upload.single("file"), (req, res) => {
+app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -215,6 +280,67 @@ app.post("/upload/portfolio", auth, upload.single("file"), (req, res) => {
 
     portfolio.push(newItem);
     fs.writeFileSync(portfolioFile, JSON.stringify(portfolio, null, 2));
+
+    // Send notification emails to all active subscribers
+    try {
+      const subscribers = await pool.query(
+        'SELECT name, email, unsubscribe_token FROM subscribers WHERE is_active = true'
+      );
+
+      if (subscribers.rows.length > 0) {
+        // Determine if it's an image or video for the notification
+        const isVideo = req.file.mimetype.startsWith('video/');
+        const artworkType = isVideo ? 'video artwork' : 'artwork';
+        
+        // Get base URL for this request
+        const baseUrl = buildBaseUrl(req);
+        
+        // Send notification to all subscribers
+        const emailPromises = subscribers.rows.map(async (subscriber) => {
+          try {
+            // Get unsubscribe token for this subscriber
+            const unsubscribeData = await pool.query(
+              'SELECT unsubscribe_token FROM subscribers WHERE email = $1',
+              [subscriber.email]
+            );
+            
+            const unsubscribeToken = unsubscribeData.rows[0]?.unsubscribe_token;
+            const unsubscribeUrl = unsubscribeToken ? `${baseUrl}/unsubscribe?token=${unsubscribeToken}` : '#';
+            
+            await sendEmail({
+              to: subscriber.email,
+              subject: "🎨 New Artwork Added to Alex Martínez Portfolio!",
+              text: `Hi ${subscriber.name}!\n\nI've just added a new ${artworkType} to my portfolio. Check it out and see what I've been working on lately!\n\nView the latest work: ${baseUrl}\n\nYou can unsubscribe at any time: ${unsubscribeUrl}\n\nBest regards,\nAlex Martínez`,
+              html: `
+                <h2>🎨 New Artwork Added!</h2>
+                <p>Hi ${subscriber.name}!</p>
+                <p>I've just added a new <strong>${artworkType}</strong> to my portfolio. Check it out and see what I've been working on lately!</p>
+                <p style="text-align: center; margin: 30px 0;">
+                  <a href="${baseUrl}" 
+                     style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                    View Latest Work
+                  </a>
+                </p>
+                <p>Thank you for following my artistic journey!</p>
+                <p>Best regards,<br>Alex Martínez</p>
+                <hr>
+                <p style="font-size: 12px; color: #666;">
+                  <a href="${unsubscribeUrl}" style="color: #666;">Unsubscribe from these emails</a>
+                </p>
+              `
+            });
+          } catch (emailError) {
+            console.error(`Failed to send notification to ${subscriber.email}:`, emailError);
+          }
+        });
+
+        await Promise.allSettled(emailPromises);
+        console.log(`Portfolio notification sent to ${subscribers.rows.length} subscribers`);
+      }
+    } catch (notificationError) {
+      console.error("Failed to send portfolio notifications:", notificationError);
+      // Don't fail the upload if notification fails
+    }
 
     res.json(newItem);
   } catch (error) {
@@ -343,6 +469,159 @@ app.post(
     }
   },
 );
+
+// ---- SUBSCRIBE ENDPOINT ---- //
+app.post(
+  "/subscribe",
+  [
+    body("name")
+      .notEmpty()
+      .trim()
+      .isLength({ min: 2, max: 100 })
+      .withMessage("Name must be 2-100 characters"),
+    body("email")
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Valid email is required"),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ success: false, errors: errors.array() });
+      }
+
+      const { name, email } = req.body;
+
+      // Check if email already exists
+      const existingSubscriber = await pool.query(
+        'SELECT * FROM subscribers WHERE email = $1',
+        [email]
+      );
+
+      if (existingSubscriber.rows.length > 0) {
+        if (existingSubscriber.rows[0].is_active) {
+          return res.status(400).json({ 
+            success: false, 
+            error: "You are already subscribed to updates!" 
+          });
+        } else {
+          // Reactivate existing subscriber
+          await pool.query(
+            'UPDATE subscribers SET is_active = true, subscribed_at = CURRENT_TIMESTAMP WHERE email = $1',
+            [email]
+          );
+        }
+      } else {
+        // Add new subscriber with unsubscribe token
+        const unsubscribeToken = generateUnsubscribeToken();
+        await pool.query(
+          'INSERT INTO subscribers (name, email, unsubscribe_token) VALUES ($1, $2, $3)',
+          [name, email, unsubscribeToken]
+        );
+      }
+
+      // Get the subscriber with unsubscribe token for welcome email
+      const subscriberData = await pool.query(
+        'SELECT unsubscribe_token FROM subscribers WHERE email = $1',
+        [email]
+      );
+      
+      const unsubscribeToken = subscriberData.rows[0]?.unsubscribe_token;
+      const baseUrl = buildBaseUrl(req);
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
+
+      // Send welcome email using Replit Mail
+      try {
+        await sendEmail({
+          to: email,
+          subject: "Welcome to Alex Martínez Portfolio Updates!",
+          text: `Hi ${name}!\n\nThank you for subscribing to my portfolio updates. You'll be the first to know when I add new artwork to my collection.\n\nYou can unsubscribe at any time: ${unsubscribeUrl}\n\nBest regards,\nAlex Martínez`,
+          html: `
+            <h2>Welcome to Alex Martínez Portfolio Updates!</h2>
+            <p>Hi ${name}!</p>
+            <p>Thank you for subscribing to my portfolio updates. You'll be the first to know when I add new artwork to my collection.</p>
+            <p>Stay tuned for exciting new creative works!</p>
+            <p>Best regards,<br>Alex Martínez</p>
+            <hr>
+            <p style="font-size: 12px; color: #666;">
+              <a href="${unsubscribeUrl}" style="color: #666;">Unsubscribe from these emails</a>
+            </p>
+          `
+        });
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Don't fail the subscription if email fails
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Successfully subscribed! Check your email for a welcome message." 
+      });
+      
+    } catch (err) {
+      console.error("Subscribe error:", err);
+      res.status(500).json({
+        success: false,
+        error: "Failed to subscribe. Please try again later.",
+      });
+    }
+  }
+);
+
+// ---- UNSUBSCRIBE ENDPOINT ---- //
+app.get("/unsubscribe", async (req, res) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.status(400).send(`
+        <html><body>
+          <h2>Invalid Unsubscribe Link</h2>
+          <p>The unsubscribe link appears to be invalid or incomplete.</p>
+        </body></html>
+      `);
+    }
+
+    // Find subscriber by token and deactivate
+    const result = await pool.query(
+      'UPDATE subscribers SET is_active = false WHERE unsubscribe_token = $1 AND is_active = true RETURNING name, email',
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send(`
+        <html><body>
+          <h2>Unsubscribe Link Not Found</h2>
+          <p>This unsubscribe link is either invalid or you may already be unsubscribed.</p>
+        </body></html>
+      `);
+    }
+
+    const subscriber = result.rows[0];
+    console.log(`Successfully unsubscribed: ${subscriber.email}`);
+
+    res.send(`
+      <html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
+        <h2 style="color: #28a745;">✓ Successfully Unsubscribed</h2>
+        <p>Hi ${subscriber.name},</p>
+        <p>You have been successfully unsubscribed from Alex Martínez Portfolio updates.</p>
+        <p>You will no longer receive email notifications about new artwork.</p>
+        <p>If you change your mind, you can always subscribe again on our website.</p>
+        <p>Best regards,<br>Alex Martínez</p>
+      </body></html>
+    `);
+
+  } catch (error) {
+    console.error('Unsubscribe error:', error);
+    res.status(500).send(`
+      <html><body>
+        <h2>Error</h2>
+        <p>There was an error processing your unsubscribe request. Please try again later or contact support.</p>
+      </body></html>
+    `);
+  }
+});
 
 // ---- Serve frontend ---- //
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
