@@ -1,17 +1,9 @@
 run = "node server.js"
-modules = ["nodejs-20", "postgresql-16"]
+modules = ["nodejs-18"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 36785
-externalPort = 3000
-
-[[ports]]
-localPort = 40789
-externalPort = 3001
 
 [agent]
 expertMode = true
@@ -45,6 +37,6 @@ outputType = "webview"
 channel = "stable-23_05"
 
 [deployment]
-deploymentTarget = "autoscale"
+deploymentTarget = "cloudrun"
 run = ["node", "server.js"]
 build = ["npm", "install"]

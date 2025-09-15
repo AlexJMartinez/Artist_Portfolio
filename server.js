@@ -13,32 +13,38 @@ const sanitizeHtml = require("sanitize-html");
 // Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
 
+// Set default values for missing environment variables
+process.env.PORT = process.env.PORT || "5000";
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
+
 // Environment validation for deployment
 function validateEnvironment() {
   const warnings = [];
   const errors = [];
-  
+
   // Check critical environment variables
   if (!process.env.DATABASE_URL) {
     warnings.push("DATABASE_URL not set - database features will be limited");
   }
-  
+
   if (!process.env.REPL_IDENTITY && !process.env.WEB_REPL_RENEWAL) {
-    warnings.push("No email authentication tokens found - email features will be limited");
+    warnings.push(
+      "No email authentication tokens found - email features will be limited",
+    );
   }
-  
+
   // Log warnings and errors
   if (warnings.length > 0) {
     console.warn("⚠️  Environment Configuration Warnings:");
-    warnings.forEach(warning => console.warn(`  - ${warning}`));
+    warnings.forEach((warning) => console.warn(`  - ${warning}`));
   }
-  
+
   if (errors.length > 0) {
     console.error("❌ Environment Configuration Errors:");
-    errors.forEach(error => console.error(`  - ${error}`));
+    errors.forEach((error) => console.error(`  - ${error}`));
     console.error("Please fix these configuration issues before deployment.");
   }
-  
+
   return { warnings, errors, hasErrors: errors.length > 0 };
 }
 
@@ -47,13 +53,14 @@ const envValidation = validateEnvironment();
 
 // Utility function to generate secure unsubscribe tokens
 function generateUnsubscribeToken() {
-  return crypto.randomBytes(32).toString('hex');
+  return crypto.randomBytes(32).toString("hex");
 }
 
 // Utility function to build URLs based on request
 function buildBaseUrl(req) {
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const host = req.headers.host || req.headers['x-forwarded-host'] || 'localhost:5000';
+  const protocol = req.headers["x-forwarded-proto"] || "https";
+  const host =
+    req.headers.host || req.headers["x-forwarded-host"] || "localhost:5000";
   return `${protocol}://${host}`;
 }
 
@@ -67,26 +74,27 @@ try {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
     });
-    
+
     // Test the connection on startup
-    pool.on('error', (err) => {
-      console.error('Database connection error:', err);
+    pool.on("error", (err) => {
+      console.error("Database connection error:", err);
     });
 
     // Attempt initial connection test (non-blocking)
-    pool.connect()
-      .then(client => {
-        console.log('Database connected successfully');
+    pool
+      .connect()
+      .then((client) => {
+        console.log("Database connected successfully");
         client.release();
       })
-      .catch(err => {
-        console.error('Database connection failed on startup:', err);
-        console.warn('Database features will be limited');
+      .catch((err) => {
+        console.error("Database connection failed on startup:", err);
+        console.warn("Database features will be limited");
       });
   }
 } catch (error) {
-  console.error('Error setting up database pool:', error);
-  console.warn('Database features will be disabled');
+  console.error("Error setting up database pool:", error);
+  console.warn("Database features will be disabled");
   pool = null;
 }
 
@@ -95,13 +103,19 @@ async function sendEmail(message) {
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
     : process.env.WEB_REPL_RENEWAL
-    ? "depl " + process.env.WEB_REPL_RENEWAL
-    : null;
+      ? "depl " + process.env.WEB_REPL_RENEWAL
+      : null;
 
   if (!xReplitToken) {
-    console.warn("No authentication token found for email service. Email functionality will be limited.");
+    console.warn(
+      "No authentication token found for email service. Email functionality will be limited.",
+    );
     // Return a mock success response instead of throwing error to prevent startup failure
-    return { success: false, error: "Email service not configured", mock: true };
+    return {
+      success: false,
+      error: "Email service not configured",
+      mock: true,
+    };
   }
 
   try {
@@ -111,7 +125,7 @@ async function sendEmail(message) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X_REPLIT_TOKEN": xReplitToken,
+          X_REPLIT_TOKEN: xReplitToken,
         },
         body: JSON.stringify({
           to: message.to,
@@ -121,18 +135,18 @@ async function sendEmail(message) {
           html: message.html,
           attachments: message.attachments,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('Replit Mail API error:', response.status, error);
+      console.error("Replit Mail API error:", response.status, error);
       throw new Error(error.message || "Failed to send email");
     }
 
     return await response.json();
   } catch (error) {
-    console.error('SendEmail error:', error);
+    console.error("SendEmail error:", error);
     throw error;
   }
 }
@@ -351,34 +365,41 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
     try {
       // Skip email notifications if database is unavailable
       if (!pool) {
-        console.warn("Database unavailable - skipping email notifications for new portfolio item");
-        return res.json({ success: true, message: "Portfolio item uploaded successfully" });
+        console.warn(
+          "Database unavailable - skipping email notifications for new portfolio item",
+        );
+        return res.json({
+          success: true,
+          message: "Portfolio item uploaded successfully",
+        });
       }
 
       const subscribers = await pool.query(
-        'SELECT name, email, unsubscribe_token FROM subscribers WHERE is_active = true'
+        "SELECT name, email, unsubscribe_token FROM subscribers WHERE is_active = true",
       );
 
       if (subscribers.rows.length > 0) {
         // Determine if it's an image or video for the notification
-        const isVideo = req.file.mimetype.startsWith('video/');
-        const artworkType = isVideo ? 'video artwork' : 'artwork';
-        
+        const isVideo = req.file.mimetype.startsWith("video/");
+        const artworkType = isVideo ? "video artwork" : "artwork";
+
         // Get base URL for this request
         const baseUrl = buildBaseUrl(req);
-        
+
         // Send notification to all subscribers
         const emailPromises = subscribers.rows.map(async (subscriber) => {
           try {
             // Get unsubscribe token for this subscriber
             const unsubscribeData = await pool.query(
-              'SELECT unsubscribe_token FROM subscribers WHERE email = $1',
-              [subscriber.email]
+              "SELECT unsubscribe_token FROM subscribers WHERE email = $1",
+              [subscriber.email],
             );
-            
+
             const unsubscribeToken = unsubscribeData.rows[0]?.unsubscribe_token;
-            const unsubscribeUrl = unsubscribeToken ? `${baseUrl}/unsubscribe?token=${unsubscribeToken}` : '#';
-            
+            const unsubscribeUrl = unsubscribeToken
+              ? `${baseUrl}/unsubscribe?token=${unsubscribeToken}`
+              : "#";
+
             await sendEmail({
               to: subscriber.email,
               subject: "🎨 New Artwork Added to Alex Martínez Portfolio!",
@@ -399,18 +420,26 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
                 <p style="font-size: 12px; color: #666;">
                   <a href="${unsubscribeUrl}" style="color: #666;">Unsubscribe from these emails</a>
                 </p>
-              `
+              `,
             });
           } catch (emailError) {
-            console.error(`Failed to send notification to ${subscriber.email}:`, emailError);
+            console.error(
+              `Failed to send notification to ${subscriber.email}:`,
+              emailError,
+            );
           }
         });
 
         await Promise.allSettled(emailPromises);
-        console.log(`Portfolio notification sent to ${subscribers.rows.length} subscribers`);
+        console.log(
+          `Portfolio notification sent to ${subscribers.rows.length} subscribers`,
+        );
       }
     } catch (notificationError) {
-      console.error("Failed to send portfolio notifications:", notificationError);
+      console.error(
+        "Failed to send portfolio notifications:",
+        notificationError,
+      );
       // Don't fail the upload if notification fails
     }
 
@@ -436,45 +465,55 @@ app.get("/portfolio-images", (req, res) => {
 });
 
 // Update portfolio caption
-app.patch("/portfolio/:id/caption", auth, [
-  body("caption").isString().isLength({ max: 500 }).withMessage("Caption must be a string with maximum 500 characters")
-], (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
-    }
+app.patch(
+  "/portfolio/:id/caption",
+  auth,
+  [
+    body("caption")
+      .isString()
+      .isLength({ max: 500 })
+      .withMessage("Caption must be a string with maximum 500 characters"),
+  ],
+  (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors.array()[0].msg });
+      }
 
-    if (!fs.existsSync(portfolioFile)) {
-      return res.status(404).json({ error: "Portfolio file not found" });
-    }
+      if (!fs.existsSync(portfolioFile)) {
+        return res.status(404).json({ error: "Portfolio file not found" });
+      }
 
-    const portfolio = JSON.parse(fs.readFileSync(portfolioFile, "utf8"));
-    const itemIndex = portfolio.findIndex(item => item.id === parseInt(req.params.id));
-    
-    if (itemIndex === -1) {
-      return res.status(404).json({ error: "Portfolio item not found" });
-    }
+      const portfolio = JSON.parse(fs.readFileSync(portfolioFile, "utf8"));
+      const itemIndex = portfolio.findIndex(
+        (item) => item.id === parseInt(req.params.id),
+      );
 
-    // Sanitize caption to prevent XSS
-    const sanitizedCaption = sanitizeHtml(req.body.caption.trim(), {
-      allowedTags: [], // No HTML tags allowed
-      allowedAttributes: {}
-    });
-    
-    portfolio[itemIndex].caption = sanitizedCaption;
-    fs.writeFileSync(portfolioFile, JSON.stringify(portfolio, null, 2));
-    
-    res.json({ 
-      success: true, 
-      message: "Caption updated successfully",
-      caption: sanitizedCaption 
-    });
-  } catch (error) {
-    console.error("Caption update error:", error);
-    res.status(500).json({ error: "Failed to update caption" });
-  }
-});
+      if (itemIndex === -1) {
+        return res.status(404).json({ error: "Portfolio item not found" });
+      }
+
+      // Sanitize caption to prevent XSS
+      const sanitizedCaption = sanitizeHtml(req.body.caption.trim(), {
+        allowedTags: [], // No HTML tags allowed
+        allowedAttributes: {},
+      });
+
+      portfolio[itemIndex].caption = sanitizedCaption;
+      fs.writeFileSync(portfolioFile, JSON.stringify(portfolio, null, 2));
+
+      res.json({
+        success: true,
+        message: "Caption updated successfully",
+        caption: sanitizedCaption,
+      });
+    } catch (error) {
+      console.error("Caption update error:", error);
+      res.status(500).json({ error: "Failed to update caption" });
+    }
+  },
+);
 
 app.delete("/portfolio/:id", auth, (req, res) => {
   try {
@@ -542,19 +581,21 @@ app.post(
         !process.env.SMTP_USER ||
         !process.env.SMTP_PASS
       ) {
-        console.warn("SMTP not configured - contact form submission logged but email not sent");
+        console.warn(
+          "SMTP not configured - contact form submission logged but email not sent",
+        );
         // Log the contact form submission for manual review
         console.log("Contact form submission (SMTP not configured):", {
           name: name,
           email: email,
           message: message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         // Return success with notification about email service
-        return res.json({ 
-          success: true, 
+        return res.json({
+          success: true,
           message: "Message received successfully. We'll get back to you soon!",
-          note: "Email service temporarily unavailable"
+          note: "Email service temporarily unavailable",
         });
       }
 
@@ -611,9 +652,10 @@ app.post(
     try {
       // Check if database is available
       if (!pool) {
-        return res.status(503).json({ 
-          success: false, 
-          error: "Database service is currently unavailable. Please try again later." 
+        return res.status(503).json({
+          success: false,
+          error:
+            "Database service is currently unavailable. Please try again later.",
         });
       }
 
@@ -626,38 +668,38 @@ app.post(
 
       // Check if email already exists
       const existingSubscriber = await pool.query(
-        'SELECT * FROM subscribers WHERE email = $1',
-        [email]
+        "SELECT * FROM subscribers WHERE email = $1",
+        [email],
       );
 
       if (existingSubscriber.rows.length > 0) {
         if (existingSubscriber.rows[0].is_active) {
-          return res.status(400).json({ 
-            success: false, 
-            error: "You are already subscribed to updates!" 
+          return res.status(400).json({
+            success: false,
+            error: "You are already subscribed to updates!",
           });
         } else {
           // Reactivate existing subscriber
           await pool.query(
-            'UPDATE subscribers SET is_active = true, subscribed_at = CURRENT_TIMESTAMP WHERE email = $1',
-            [email]
+            "UPDATE subscribers SET is_active = true, subscribed_at = CURRENT_TIMESTAMP WHERE email = $1",
+            [email],
           );
         }
       } else {
         // Add new subscriber with unsubscribe token
         const unsubscribeToken = generateUnsubscribeToken();
         await pool.query(
-          'INSERT INTO subscribers (name, email, unsubscribe_token) VALUES ($1, $2, $3)',
-          [name, email, unsubscribeToken]
+          "INSERT INTO subscribers (name, email, unsubscribe_token) VALUES ($1, $2, $3)",
+          [name, email, unsubscribeToken],
         );
       }
 
       // Get the subscriber with unsubscribe token for welcome email
       const subscriberData = await pool.query(
-        'SELECT unsubscribe_token FROM subscribers WHERE email = $1',
-        [email]
+        "SELECT unsubscribe_token FROM subscribers WHERE email = $1",
+        [email],
       );
-      
+
       const unsubscribeToken = subscriberData.rows[0]?.unsubscribe_token;
       const baseUrl = buildBaseUrl(req);
       const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
@@ -678,18 +720,18 @@ app.post(
             <p style="font-size: 12px; color: #666;">
               <a href="${unsubscribeUrl}" style="color: #666;">Unsubscribe from these emails</a>
             </p>
-          `
+          `,
         });
       } catch (emailError) {
         console.error("Failed to send welcome email:", emailError);
         // Don't fail the subscription if email fails
       }
 
-      res.json({ 
-        success: true, 
-        message: "Successfully subscribed! Check your email for a welcome message." 
+      res.json({
+        success: true,
+        message:
+          "Successfully subscribed! Check your email for a welcome message.",
       });
-      
     } catch (err) {
       console.error("Subscribe error:", err);
       res.status(500).json({
@@ -697,7 +739,7 @@ app.post(
         error: "Failed to subscribe. Please try again later.",
       });
     }
-  }
+  },
 );
 
 // ---- UNSUBSCRIBE ENDPOINT ---- //
@@ -715,7 +757,7 @@ app.get("/unsubscribe", async (req, res) => {
     }
 
     const { token } = req.query;
-    
+
     if (!token) {
       return res.status(400).send(`
         <html><body>
@@ -727,8 +769,8 @@ app.get("/unsubscribe", async (req, res) => {
 
     // Find subscriber by token and deactivate
     const result = await pool.query(
-      'UPDATE subscribers SET is_active = false WHERE unsubscribe_token = $1 AND is_active = true RETURNING name, email',
-      [token]
+      "UPDATE subscribers SET is_active = false WHERE unsubscribe_token = $1 AND is_active = true RETURNING name, email",
+      [token],
     );
 
     if (result.rows.length === 0) {
@@ -753,9 +795,8 @@ app.get("/unsubscribe", async (req, res) => {
         <p>Best regards,<br>Alex Martínez</p>
       </body></html>
     `);
-
   } catch (error) {
-    console.error('Unsubscribe error:', error);
+    console.error("Unsubscribe error:", error);
     res.status(500).send(`
       <html><body>
         <h2>Error</h2>
@@ -767,29 +808,34 @@ app.get("/unsubscribe", async (req, res) => {
 
 // ---- Serve frontend ---- //
 // Serve uploads with aggressive caching since filenames are unique
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
-  maxAge: '1y', // Cache for 1 year
-  etag: true,
-  setHeaders: (res, path) => {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  }
-}));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    maxAge: "1y", // Cache for 1 year
+    etag: true,
+    setHeaders: (res, path) => {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    },
+  }),
+);
 
 // Serve static files from public with caching
-app.use(express.static(path.join(__dirname, "public"), {
-  maxAge: '1d', // Cache for 1 day
-  etag: true,
-  setHeaders: (res, path) => {
-    // Cache uploaded files for longer since they have unique names
-    if (path.includes('/uploads/')) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
-    }
-  }
-}));
+app.use(
+  express.static(path.join(__dirname, "public"), {
+    maxAge: "1d", // Cache for 1 day
+    etag: true,
+    setHeaders: (res, path) => {
+      // Cache uploaded files for longer since they have unique names
+      if (path.includes("/uploads/")) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable"); // 1 year
+      }
+    },
+  }),
+);
 
 app.get("*", (req, res) => {
   // Prevent caching of the SPA shell to ensure fresh content
-  res.set('Cache-Control', 'no-store, must-revalidate');
+  res.set("Cache-Control", "no-store, must-revalidate");
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
