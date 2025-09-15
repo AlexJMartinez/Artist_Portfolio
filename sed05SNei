@@ -5,6 +5,10 @@ modules = ["nodejs-20", "postgresql-16"]
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 38825
+externalPort = 3000
+
 [agent]
 expertMode = true
 integrations = ["replitmail:1.0.0"]
@@ -34,7 +38,7 @@ waitForPort = 5000
 outputType = "webview"
 
 [nix]
-channel = "stable-25_05"
+channel = "stable-23_05"
 
 [deployment]
 deploymentTarget = "autoscale"
