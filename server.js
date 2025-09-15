@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const { Pool } = require("pg");
 const crypto = require("crypto");
+const compression = require("compression");
 // Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
 
@@ -74,6 +75,7 @@ async function sendEmail(message) {
 }
 
 const app = express();
+app.use(compression()); // Enable gzip compression
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

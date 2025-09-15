@@ -1515,8 +1515,8 @@
                       <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
                         ${
                           isVideo
-                            ? `<video src="${item.url}" autoplay muted loop playsinline preload="metadata"></video>`
-                            : `<img src="${item.url}" alt="Artwork" loading="lazy">`
+                            ? `<video src="${item.url}" muted loop playsinline preload="none" loading="lazy"></video>`
+                            : `<img src="${item.url}" alt="Artwork" loading="lazy" decoding="async">`
                         }
                         ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
                       </div>`;
@@ -1539,13 +1539,27 @@
                 ".gallery-item img, .gallery-item video",
               ),
             );
-            document.querySelectorAll(".gallery-item video").forEach((vid) => {
-              vid.muted = true;
-              vid.loop = true;
-              vid.playsInline = true;
-              vid.addEventListener("loadeddata", () => {
-                vid.play().catch(() => {});
+            // Setup Intersection Observer for lazy video loading
+            const videoObserver = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  const vid = entry.target;
+                  vid.muted = true;
+                  vid.loop = true;
+                  vid.playsInline = true;
+                  vid.load(); // Start loading the video
+                  vid.addEventListener("loadeddata", () => {
+                    vid.play().catch(() => {});
+                  }, { once: true });
+                  videoObserver.unobserve(vid); // Stop observing once loaded
+                }
               });
+            }, { 
+              rootMargin: '50px' // Start loading 50px before the video enters viewport
+            });
+
+            document.querySelectorAll(".gallery-item video").forEach((vid) => {
+              videoObserver.observe(vid);
             });
             mediaItems.forEach((el, idx) =>
               el.addEventListener("click", () => {
