@@ -261,6 +261,30 @@ function auth(req, res, next) {
   }
 }
 
+// Health check endpoint for Cloud Run deployment
+app.get("/health", (req, res) => {
+  try {
+    // Check if critical services are available
+    const healthStatus = {
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: pool ? "connected" : "unavailable",
+      environment: process.env.NODE_ENV || "development"
+    };
+    
+    // Return 200 OK with health information
+    res.status(200).json(healthStatus);
+  } catch (error) {
+    console.error("Health check error:", error);
+    res.status(503).json({
+      status: "unhealthy",
+      timestamp: new Date().toISOString(),
+      error: "Service unavailable"
+    });
+  }
+});
+
 // Login endpoint
 app.post(
   "/login",
