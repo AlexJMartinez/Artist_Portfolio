@@ -137,6 +137,31 @@
         margin-top: 0.5rem;
       } /* space beneath main H2 */
 
+      /* chip-style labels */
+      .chip-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #333;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+      }
+
+      .chip-label i {
+        font-size: 0.85rem;
+        opacity: 0.8;
+      }
+
+      .chip-label:hover {
+        background: rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+      }
+
       /* your existing grid, but it now fills the tools-wrap width */
       .tools-grid {
         display: grid;
@@ -1317,7 +1342,7 @@
                 <h2>Tools + Tech</h2>
                 <div class="tools-wrap">
                 <!-- GRID 1 -->
-                <h3 class="tools-label">Creative</h3>
+                <h3 class="tools-label chip-label"><i class="fas fa-palette"></i> Studio</h3>
                 <div class="tools-grid">
                   <a class="tool" href="" target="_blank" rel="noopener">
                     <img src="/logos/Ableton.png" alt="HTML" loading="lazy">
@@ -1379,7 +1404,7 @@
                   <!-- Add more tiles by repeating the <a class="tool"> … </a> block -->
                 </div>
                 <!-- GRID 2 -->
-                  <h3 class="tools-label">Corporate</h3>
+                  <h3 class="tools-label chip-label"><i class="fas fa-briefcase"></i> Ops</h3>
                   <div class="tools-grid">
                     <a class="tool" href="" target="_blank" rel="noopener">
                       <img src="/logos_corp/Slack.png" alt="Slack" loading="lazy">
