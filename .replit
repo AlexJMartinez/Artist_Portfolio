@@ -7,6 +7,7 @@ externalPort = 80
 
 [agent]
 expertMode = true
+integrations = ["replitmail:1.0.0"]
 
 [workflows]
 runButton = "Project"
