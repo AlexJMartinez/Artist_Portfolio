@@ -2092,6 +2092,8 @@
         const originalLoadPage = loadPage;
         loadPage = function (page) {
           originalLoadPage(page);
+          // Reset scroll position to top when navigating between pages
+          window.scrollTo(0, 0);
           if (window.updateFloatingNav) window.updateFloatingNav(page);
           recalcFloatingNavBg();
         };
