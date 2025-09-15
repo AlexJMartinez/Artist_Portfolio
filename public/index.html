@@ -109,6 +109,82 @@
         transform: translateY(-8px) rotate(-45deg);
       }
 
+      /* Tools page layout */
+      .tools {
+        /* keep your centered page header */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 160px);
+        text-align: center;
+        padding: 4rem 1rem;
+      }
+
+      /* shared width for both grids + their labels */
+      .tools-wrap {
+        width: min(920px, 100%);
+        margin-inline: auto;
+      }
+
+      /* section labels aligned to the left edge of the grid */
+      .tools-label {
+        margin: 2rem 0 0.75rem;
+        text-align: left;
+        font-weight: 600;
+      }
+      .tools-label:first-of-type {
+        margin-top: 0.5rem;
+      } /* space beneath main H2 */
+
+      /* your existing grid, but it now fills the tools-wrap width */
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 16px;
+        width: 100%;
+        margin-top: 0; /* spacing handled by the labels above */
+      }
+
+      /* each item is an anchor that is a perfect square */
+      .tool {
+        position: relative;
+        display: block;
+        aspect-ratio: 1 / 1; /* perfect square */
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        text-decoration: none; /* no underline */
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+
+      .tool:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+      }
+
+      /* focus for keyboard users */
+      .tool:focus-visible {
+        outline: 3px solid #e63946;
+        outline-offset: 3px;
+        border-radius: 14px;
+      }
+
+      /* center the img and keep it contained */
+      .tool img {
+        position: absolute;
+        inset: 0;
+        width: 70%;
+        height: 70%;
+        margin: auto;
+        object-fit: contain; /* keep logos clean */
+        pointer-events: none;
+      }
+
       /* Mobile dropdown */
       @media (max-width: 700px) {
         .nav-toggle {
@@ -195,31 +271,31 @@
         min-width: 150px;
       }
 
-      .insta-icon {
+      /* Social icons under the hero */
+      .socials {
         display: inline-flex;
-        justify-content: center;
+        gap: 14px;
         align-items: center;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle at 30% 107%,
-          #fdf497 0%,
-          #fd5949 45%,
-          #d6249f 60%,
-          #285aeb 90%
-        );
-        color: #fff;
-        font-size: 1.6rem;
         margin-top: 1rem;
-        text-decoration: none;
       }
-      .insta-icon:hover {
-        transform: scale(1.1);
+
+      .social-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         text-decoration: none;
+        color: #111; /* black icon */
+        width: 32px; /* touch target without a visible circle */
+        height: 32px;
       }
-      .insta-icon i {
+
+      .social-link i {
+        font-size: 1.4rem;
         line-height: 1;
+      }
+
+      .social-link:hover {
+        transform: scale(1.06);
       }
 
       /* ===== ABOUT ===== */
@@ -499,14 +575,62 @@
         }
       }
 
+      /* HIDE login by default */
       #loginBtn,
       #pillLoginBtn {
         display: none !important;
       }
+      /* SHOW login only when you’ve enabled owner mode AND you are NOT authenticated */
+      .owner-mode:not(.is-auth) #loginBtn,
+      .owner-mode:not(.is-auth) #pillLoginBtn {
+        display: inline-block !important;
+      }
 
-      /* show only when owner mode is active */
-      .owner-mode #loginBtn,
-      .owner-mode #pillLoginBtn {
+      /* Password toggle */
+      .password-field {
+        position: relative;
+      }
+      .password-field input {
+        padding-right: 48px; /* room for the eye */
+      }
+
+      /* Stretch the button to the input's height and center the icon */
+      .toggle-password {
+        position: absolute;
+        top: 0;
+        bottom: 0; /* <-- centers vertically with flex */
+        right: 10px;
+        width: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: #666;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent; /* no gray flash on mobile */
+      }
+
+      /* Remove the red outline/ring; keep a subtle focus only for keyboard users */
+      .toggle-password:focus {
+        outline: none;
+        box-shadow: none;
+      }
+      .toggle-password:focus-visible {
+        outline: 2px solid #888; /* pick your color or remove entirely */
+        outline-offset: 2px;
+        border-radius: 6px;
+      }
+
+      /* HIDE logout by default */
+      #logoutBtn,
+      #pillLogoutBtn {
+        display: none !important;
+      }
+      /* SHOW logout only when authenticated */
+      .is-auth #logoutBtn,
+      .is-auth #pillLogoutBtn {
         display: inline-block !important;
       }
 
@@ -783,6 +907,8 @@
         <li><a onclick="loadPage('home')">Home</a></li>
         <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
         <li><a onclick="loadPage('about')">About</a></li>
+        <li><a onclick="loadPage('tools')">Tools + Tech</a></li>
+        <!-- NEW -->
         <li><a onclick="loadPage('contact')">Contact</a></li>
         <li>
           <a id="loginBtn" onclick="loadPage('login')">Login</a>
@@ -827,6 +953,13 @@
           data-page="about"
         >
           <i class="fas fa-user fa-fw"></i>
+        </a>
+        <a
+          class="floating-nav-item"
+          onclick="loadPage('tools')"
+          data-page="tools"
+        >
+          <i class="fa-solid fa-microchip fa-fw"></i>
         </a>
         <div class="floating-nav-overflow floating-nav-item">
           <i class="fas fa-ellipsis-h fa-fw"></i>
@@ -1119,18 +1252,28 @@
           setMenu(false);
           if (page === "home") {
             content.innerHTML = `
-              <section class="hero">
-                <h1>Alex Martínez</h1>
-                <h2 id="subtitle"></h2>
-                <div class="subscribe">
-                  <form id="subscribeForm">
-                    <input type="text" placeholder="Your name" required>
-                    <input type="email" placeholder="Your email" required>
-                    <button>Subscribe</button>
-                  </form>
-                </div>
-                <a href="https://instagram.com/debtfortunes" target="_blank" class="insta-icon"><i class="fab fa-instagram"></i></a>
-              </section>`;
+            <section class="hero">
+              <h1>Alex Martínez</h1>
+              <h2 id="subtitle"></h2>
+              <div class="subscribe">
+                <form id="subscribeForm">
+                  <input type="text" placeholder="Your name" required>
+                  <input type="email" placeholder="Your email" required>
+                  <button>Subscribe</button>
+                </form>
+              </div>
+
+              <div class="socials">
+                <a class="social-link" href="https://instagram.com/debtfortunes"
+                   target="_blank" rel="noopener" aria-label="Instagram">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a class="social-link" href="https://www.linkedin.com/in/alexanderjustinmartinez/"
+                   target="_blank" rel="noopener" aria-label="LinkedIn">
+                  <i class="fab fa-linkedin-in"></i>
+                </a>
+              </div>
+            </section>`;
             closeMenuOnLinkClick();
             startTypingEffect("subtitle", "Minimalist Abstract Expression");
           }
@@ -1166,6 +1309,122 @@
                   loadPage("about");
                 });
             }
+          }
+
+          if (page === "tools") {
+            content.innerHTML = `
+              <section class="tools">
+                <h2>Tools + Tech</h2>
+                <div class="tools-wrap">
+                <!-- GRID 1 -->
+                <h3 class="tools-label">Creative</h3>
+                <div class="tools-grid">
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Ableton.png" alt="HTML" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Adobe.jpeg" alt="CSS" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Avid.jpg" alt="JavaScript" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Blender.png" alt="GSAP" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Chat.png" alt="PixiJS" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Cycling.png" alt="Pico.css" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Davinci.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Javascript.png" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Logic.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Mediapipe.png" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/P5.png" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Python.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Touch_OSC.png" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/TouchDesigner.png" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Hex.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Gimp.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Inkscape.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/VS_code.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <a class="tool" href="" target="_blank" rel="noopener">
+                    <img src="/logos/Figma.jpeg" alt="Font Awesome" loading="lazy">
+                  </a>
+                  <!-- Add more tiles by repeating the <a class="tool"> … </a> block -->
+                </div>
+                <!-- GRID 2 -->
+                  <h3 class="tools-label">Corporate</h3>
+                  <div class="tools-grid">
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Slack.png" alt="Slack" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Jira.jpeg" alt="Jira" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Confluence.jpeg" alt="Confluence" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Asana.png" alt="Asana" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Notion.png" alt="Notion" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Monday.jpeg" alt="Google Workspace" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Office.png" alt="Microsoft 365" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Smartsheet.png" alt="Salesforce" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Freshdesk.png" alt="Salesforce" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos/Github.png" alt="Font Awesome" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Zapier.png" alt="Font Awesome" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/n8n.png" alt="Font Awesome" loading="lazy">
+                    </a>
+                    <a class="tool" href="" target="_blank" rel="noopener">
+                      <img src="/logos_corp/Make.png" alt="Font Awesome" loading="lazy">
+                    </a>
+                    <!-- add more corporate apps as needed -->
+                  </div>
+                </div>
+              </section>`;
+            closeMenuOnLinkClick();
           }
 
           if (page === "portfolio") {
@@ -1372,23 +1631,28 @@
                   }
                 } catch (error) {
                   console.error("Contact error:", error);
-                  alert("❌ Network error. Please try again.");
+                  alert("i�� Network error. Please try again.");
                 }
               });
           }
 
           if (page === "login") {
             content.innerHTML = `
-              <div class="login-container">
-                <div class="login-card">
-                  <h2>Login</h2>
-                  <form id="loginForm">
-                    <input id="user" placeholder="Username">
-                    <input id="pass" type="password" placeholder="Password">
-                    <button>Login</button>
-                  </form>
-                </div>
-              </div>`;
+            <div class="login-container">
+              <div class="login-card">
+                <h2>Login</h2>
+                <form id="loginForm">
+                  <input id="user" placeholder="Username" autocomplete="username">
+                  <div class="password-field">
+                    <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
+                    <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
+                      <i class="fa-regular fa-eye"></i>
+                    </button>
+                  </div>
+                  <button>Login</button>
+                </form>
+              </div>
+            </div>`;
             closeMenuOnLinkClick();
             document
               .getElementById("loginForm")
@@ -1422,6 +1686,21 @@
                   alert("❌ Network error. Please try again.");
                 }
               });
+            const passInput = document.getElementById("pass");
+            const toggleBtn = document.querySelector(".toggle-password");
+
+            toggleBtn?.addEventListener("click", () => {
+              const showing = passInput.type === "text";
+              passInput.type = showing ? "password" : "text";
+              toggleBtn.setAttribute("aria-pressed", (!showing).toString());
+              toggleBtn.setAttribute(
+                "aria-label",
+                showing ? "Show password" : "Hide password",
+              );
+              toggleBtn.innerHTML = showing
+                ? '<i class="fa-regular fa-eye"></i>'
+                : '<i class="fa-regular fa-eye-slash"></i>';
+            });
           }
         }
 
@@ -1429,8 +1708,12 @@
         function logout() {
           token = null;
           localStorage.removeItem("adminToken");
+
+          // Hide Login again by default until you hit the admin shortcut
+          ownerMode = false;
+          localStorage.removeItem("ownerMode");
+
           updateNavigation();
-          // Get current page to re-render it and remove admin UI elements
           const currentPage = getCurrentPage();
           loadPage(currentPage || "home");
           alert("✅ Logged out successfully");
@@ -1442,6 +1725,7 @@
           if (content.querySelector(".hero")) return "home";
           if (content.querySelector(".about")) return "about";
           if (content.querySelector(".portfolio-wrapper")) return "portfolio";
+          if (content.querySelector(".tools")) return "tools";
           if (content.querySelector(".contact-card")) return "contact";
           if (content.querySelector(".login-card")) return "login";
           return "home"; // fallback
@@ -1453,8 +1737,9 @@
           const pillLoginBtn = document.getElementById("pillLoginBtn");
           const pillLogoutBtn = document.getElementById("pillLogoutBtn");
 
-          // flip body class so CSS can override the !important hide
+          // reflect state on <body>
           document.body.classList.toggle("owner-mode", ownerMode);
+          document.body.classList.toggle("is-auth", !!token);
 
           const showLogin = ownerMode && !token; // only you + not logged in
           const showLogout = !!token; // logged in
@@ -1695,14 +1980,56 @@
           window.updateFloatingNav = setActiveNav;
         }
 
-        // Enhance loadPage to update floating nav
+        function recalcFloatingNavBg() {
+          const pill = document.querySelector(".floating-nav-pill");
+          const bg = pill?.querySelector(".floating-nav-active-bg");
+          const activeItem =
+            document.querySelector(".floating-nav-item.active") ||
+            document.querySelector('.floating-nav-item[data-page="home"]');
+          if (!pill || !bg || !activeItem) return;
+
+          // If you want the first position jump to be instant, briefly disable transition:
+          const prev = bg.style.transition;
+          bg.style.transition = "none";
+          // let layout settle, then move
+          requestAnimationFrame(() => {
+            const x =
+              activeItem.offsetLeft +
+              (activeItem.offsetWidth - bg.offsetWidth) / 2;
+            bg.style.transform = `translateX(${Math.round(x)}px)`;
+            // restore transition for future moves
+            requestAnimationFrame(() => (bg.style.transition = prev || ""));
+          });
+        }
+
+        // after you update the floating nav on page changes:
         const originalLoadPage = loadPage;
         loadPage = function (page) {
           originalLoadPage(page);
-          if (window.updateFloatingNav) {
-            window.updateFloatingNav(page);
-          }
+          if (window.updateFloatingNav) window.updateFloatingNav(page);
+          recalcFloatingNavBg();
         };
+
+        // on resize and breakpoint changes:
+        const mq = window.matchMedia("(max-width:700px)");
+        mq.addEventListener?.("change", () => {
+          // when pill switches between display:none/block
+          if (mq.matches) setTimeout(recalcFloatingNavBg, 0);
+        });
+        window.addEventListener("resize", () => {
+          // debounce if you like; simple is fine here
+          recalcFloatingNavBg();
+        });
+
+        // when icon fonts finish loading:
+        if (document.fonts?.ready) {
+          document.fonts.ready.then(recalcFloatingNavBg);
+        }
+
+        // (nice-to-have) if you want rock-solid behavior on any layout change:
+        new ResizeObserver(recalcFloatingNavBg).observe(
+          document.querySelector(".floating-nav-pill"),
+        );
 
         window.addEventListener("scroll", handleScroll, {
           passive: true,
@@ -1710,6 +2037,7 @@
         handleScroll(); // initialize state on load/restore
         /* Boot */
         initFloatingNav();
+        recalcFloatingNavBg();
         updateNavigation(); // Set initial navigation state
         loadPage("home");
 
