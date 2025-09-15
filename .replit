@@ -38,7 +38,7 @@ waitForPort = 5000
 outputType = "webview"
 
 [nix]
-channel = "stable-25_05"
+channel = "stable-23_05"
 
 [deployment]
 deploymentTarget = "autoscale"
