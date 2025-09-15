@@ -143,7 +143,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 1024 * 1024 * 1024, // 1 GB
+    fileSize: 50 * 1024 * 1024, // 50 MB - more reasonable limit
   },
 });
 
@@ -626,12 +626,30 @@ app.get("/unsubscribe", async (req, res) => {
 });
 
 // ---- Serve frontend ---- //
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Serve uploads with aggressive caching since filenames are unique
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  maxAge: '1y', // Cache for 1 year
+  etag: true,
+  setHeaders: (res, path) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+}));
 
-// Serve static files from public
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static files from public with caching
+app.use(express.static(path.join(__dirname, "public"), {
+  maxAge: '1d', // Cache for 1 day
+  etag: true,
+  setHeaders: (res, path) => {
+    // Cache uploaded files for longer since they have unique names
+    if (path.includes('/uploads/')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+    }
+  }
+}));
 
 app.get("*", (req, res) => {
+  // Prevent caching of the SPA shell to ensure fresh content
+  res.set('Cache-Control', 'no-store, must-revalidate');
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 

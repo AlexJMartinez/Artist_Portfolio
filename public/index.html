@@ -12,8 +12,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js"></script>
+    <!-- Performance: DNS prefetch for CDNs -->
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <style>
       body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -1086,9 +1088,44 @@
             .forEach((a) => a.addEventListener("click", () => setMenu(false)));
         }
 
+        /* ===== Dynamic Library Loading ===== */
+        let gsapLoaded = false;
+        let pixiLoaded = false;
+        
+        async function loadGSAP() {
+          if (gsapLoaded || window.gsap) return;
+          return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js';
+            script.onload = () => {
+              gsapLoaded = true;
+              resolve();
+            };
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+        
+        async function loadPIXI() {
+          if (pixiLoaded || window.PIXI) return;
+          return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js';
+            script.onload = () => {
+              pixiLoaded = true;
+              resolve();
+            };
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+
         /* ===== About PIXI ===== */
         let aboutPixiApp = null;
-        function initWavyImage(imageUrl) {
+        async function initWavyImage(imageUrl) {
+          // Load PIXI and GSAP dynamically only when needed
+          await Promise.all([loadPIXI(), loadGSAP()]);
+          
           if (aboutPixiApp) {
             aboutPixiApp.destroy(true, {
               children: true,
