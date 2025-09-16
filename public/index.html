@@ -1103,14 +1103,16 @@
 
       .carousel-container {
         position: relative;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: visible;
         border-radius: 12px;
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 2rem;
         margin-bottom: 1.5rem;
-        min-height: 300px;
+        height: auto;
+        min-height: auto;
       }
 
       .carousel-track {
@@ -1127,6 +1129,7 @@
         transition: opacity 0.4s ease, transform 0.4s ease;
         position: relative;
         padding: 1rem 0;
+        height: auto;
       }
 
       .carousel-slide.active {
