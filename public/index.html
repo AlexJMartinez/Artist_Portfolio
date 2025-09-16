@@ -1045,8 +1045,8 @@
         font-size: 14px;
       }
 
-      /* Show floating nav on mobile and hide web navbar */
-      @media screen and (max-width: 700px) {
+      /* Show floating nav on mobile and hide web navbar - More aggressive approach */
+      @media screen and (max-width: 768px) {
         .floating-nav {
           display: block !important;
         }
@@ -1055,8 +1055,28 @@
         }
       }
 
-      /* Ensure floating nav works on touch devices (only on small screens) */
-      @media screen and (max-width: 700px) and (hover: none) and (pointer: coarse) {
+      /* Force mobile nav on any narrow screen */
+      @media (max-width: 768px) {
+        .floating-nav {
+          display: block !important;
+        }
+        nav {
+          display: none !important;
+        }
+      }
+
+      /* Ensure floating nav works on touch devices */
+      @media (hover: none) and (pointer: coarse) and (max-width: 768px) {
+        .floating-nav {
+          display: block !important;
+        }
+        nav {
+          display: none !important;
+        }
+      }
+
+      /* Fallback for very specific mobile conditions */
+      @media only screen and (max-device-width: 480px) {
         .floating-nav {
           display: block !important;
         }
