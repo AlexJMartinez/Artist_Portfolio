@@ -1125,11 +1125,19 @@
         opacity: 0;
         transform: translateX(20px);
         transition: opacity 0.4s ease, transform 0.4s ease;
+        position: relative;
+        padding: 1rem 0;
       }
 
       .carousel-slide.active {
-        opacity: 1;
-        transform: translateX(0);
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+      }
+
+      /* Make first slide visible immediately */
+      .debt-fortunes-carousel .carousel-slide:first-child {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
       }
 
       .carousel-slide h3 {
@@ -2611,12 +2619,29 @@
         /* ===== Debt Fortunes Carousel ===== */
         function initDebtCarousel() {
           const track = document.getElementById('debtCarouselTrack');
-          const slides = document.querySelectorAll('.carousel-slide');
+          const slides = document.querySelectorAll('.debt-fortunes-carousel .carousel-slide');
           const prevBtn = document.getElementById('debtCarouselPrev');
           const nextBtn = document.getElementById('debtCarouselNext');
-          const dots = document.querySelectorAll('.carousel-dots .dot');
+          const dots = document.querySelectorAll('#debtCarouselDots .dot');
           
-          if (!track || !slides.length) return;
+          console.log('Carousel Init:', { 
+            track: !!track, 
+            slidesCount: slides.length, 
+            prevBtn: !!prevBtn, 
+            nextBtn: !!nextBtn, 
+            dotsCount: dots.length 
+          });
+          
+          if (!track || slides.length === 0) {
+            console.error('Carousel elements not found!');
+            // Force show first slide with CSS if JS fails
+            const firstSlide = document.querySelector('.debt-fortunes-carousel .carousel-slide');
+            if (firstSlide) {
+              firstSlide.style.opacity = '1';
+              firstSlide.style.transform = 'translateX(0)';
+            }
+            return;
+          }
 
           let currentSlide = 0;
           let startX = 0;
