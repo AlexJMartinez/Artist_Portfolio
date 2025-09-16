@@ -1112,7 +1112,8 @@
         padding: 2rem;
         margin-bottom: 1.5rem;
         height: auto;
-        min-height: auto;
+        min-height: 250px;
+        max-height: none;
       }
 
       .carousel-track {
@@ -1149,14 +1150,13 @@
         line-height: 1.6;
       }
 
-      /* Center slide content */
+      /* Center slide content without flex truncation */
       .debt-fortunes-carousel .carousel-slide {
         text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: auto;
+        display: block;
+        min-height: 200px;
         padding: 2rem 0;
+        overflow: visible;
       }
 
       .debt-fortunes-carousel .slide-inner {
