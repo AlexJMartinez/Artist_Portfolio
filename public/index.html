@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Alex Martínez – Artist</title>
     <link
       rel="stylesheet"
@@ -16,6 +16,9 @@
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    
+    <!-- Remove preload to avoid duplicate fetches since stylesheets are already linked above -->
     <style>
       body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -1043,12 +1046,22 @@
       }
 
       /* Show floating nav on mobile and hide web navbar */
-      @media (max-width: 700px) {
+      @media screen and (max-width: 700px) {
         .floating-nav {
-          display: block;
+          display: block !important;
         }
         nav {
-          display: none;
+          display: none !important;
+        }
+      }
+
+      /* Ensure floating nav works on touch devices (only on small screens) */
+      @media screen and (max-width: 700px) and (hover: none) and (pointer: coarse) {
+        .floating-nav {
+          display: block !important;
+        }
+        nav {
+          display: none !important;
         }
       }
 

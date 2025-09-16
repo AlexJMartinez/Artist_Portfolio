@@ -152,6 +152,23 @@ async function sendEmail(message) {
 }
 
 const app = express();
+
+// Add cache control for static assets to improve performance
+app.use('/uploads', (req, res, next) => {
+  res.set('Cache-Control', 'public, max-age=31536000'); // 1 year for uploaded images
+  next();
+});
+
+// Disable caching for the main HTML and API responses to prevent replit iframe caching issues
+app.use((req, res, next) => {
+  if (req.path === '/' || req.path.endsWith('.html') || req.path.startsWith('/api') || req.path === '/portfolio-images' || req.path === '/about' || req.path === '/about-data') {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+  next();
+});
+
 app.use(compression()); // Enable gzip compression
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -696,6 +713,7 @@ app.post(
         [email],
       );
 
+      let isNewSubscriber = false;
       if (existingSubscriber.rows.length > 0) {
         if (existingSubscriber.rows[0].is_active) {
           return res.status(400).json({
@@ -708,6 +726,7 @@ app.post(
             "UPDATE subscribers SET is_active = true, subscribed_at = CURRENT_TIMESTAMP WHERE email = $1",
             [email],
           );
+          isNewSubscriber = false;
         }
       } else {
         // Add new subscriber with unsubscribe token
@@ -716,39 +735,43 @@ app.post(
           "INSERT INTO subscribers (name, email, unsubscribe_token) VALUES ($1, $2, $3)",
           [name, email, unsubscribeToken],
         );
+        isNewSubscriber = true;
       }
 
-      // Get the subscriber with unsubscribe token for welcome email
-      const subscriberData = await pool.query(
-        "SELECT unsubscribe_token FROM subscribers WHERE email = $1",
-        [email],
-      );
+      // Only send welcome email to new subscribers, not reactivated ones
+      if (isNewSubscriber) {
+        // Get the subscriber with unsubscribe token for welcome email
+        const subscriberData = await pool.query(
+          "SELECT unsubscribe_token FROM subscribers WHERE email = $1",
+          [email],
+        );
 
-      const unsubscribeToken = subscriberData.rows[0]?.unsubscribe_token;
-      const baseUrl = buildBaseUrl(req);
-      const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
+        const unsubscribeToken = subscriberData.rows[0]?.unsubscribe_token;
+        const baseUrl = buildBaseUrl(req);
+        const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${unsubscribeToken}`;
 
-      // Send welcome email using Replit Mail
-      try {
-        await sendEmail({
-          to: email,
-          subject: "Welcome to Alex Martínez Portfolio Updates!",
-          text: `Hi ${name}!\n\nThank you for subscribing to my portfolio updates. You'll be the first to know when I add new artwork to my collection.\n\nYou can unsubscribe at any time: ${unsubscribeUrl}\n\nBest regards,\nAlex Martínez`,
-          html: `
-            <h2>Welcome to Alex Martínez Portfolio Updates!</h2>
-            <p>Hi ${name}!</p>
-            <p>Thank you for subscribing to my portfolio updates. You'll be the first to know when I add new artwork to my collection.</p>
-            <p>Stay tuned for exciting new creative works!</p>
-            <p>Best regards,<br>Alex Martínez</p>
-            <hr>
-            <p style="font-size: 12px; color: #666;">
-              <a href="${unsubscribeUrl}" style="color: #666;">Unsubscribe from these emails</a>
-            </p>
-          `,
-        });
-      } catch (emailError) {
-        console.error("Failed to send welcome email:", emailError);
-        // Don't fail the subscription if email fails
+        // Send welcome email using Replit Mail
+        try {
+          await sendEmail({
+            to: email,
+            subject: "Welcome to Alex Martínez Portfolio Updates!",
+            text: `Hi ${name}!\n\nThank you for subscribing to my portfolio updates. You'll be the first to know when I add new artwork to my collection.\n\nYou can unsubscribe at any time: ${unsubscribeUrl}\n\nBest regards,\nAlex Martínez`,
+            html: `
+              <h2>Welcome to Alex Martínez Portfolio Updates!</h2>
+              <p>Hi ${name}!</p>
+              <p>Thank you for subscribing to my portfolio updates. You'll be the first to know when I add new artwork to my collection.</p>
+              <p>Stay tuned for exciting new creative works!</p>
+              <p>Best regards,<br>Alex Martínez</p>
+              <hr>
+              <p style="font-size: 12px; color: #666;">
+                <a href="${unsubscribeUrl}" style="color: #666;">Unsubscribe from these emails</a>
+              </p>
+            `,
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+          // Don't fail the subscription if email fails
+        }
       }
 
       res.json({
