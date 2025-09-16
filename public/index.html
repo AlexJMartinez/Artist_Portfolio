@@ -1134,10 +1134,31 @@
         transform: translateX(0) !important;
       }
 
-      /* Make first slide visible immediately */
-      .debt-fortunes-carousel .carousel-slide:first-child {
-        opacity: 1 !important;
-        transform: translateX(0) !important;
+      /* Prevent text truncation in carousel slides */
+      .debt-fortunes-carousel h3,
+      .debt-fortunes-carousel p {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        display: block !important;
+        -webkit-line-clamp: unset !important;
+        max-height: none !important;
+        line-height: 1.6;
+      }
+
+      /* Center slide content */
+      .debt-fortunes-carousel .carousel-slide {
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+      }
+
+      .debt-fortunes-carousel .slide-inner {
+        max-width: 90%;
+        margin: 0 auto;
+        padding: 1rem;
       }
 
       .carousel-slide h3 {
@@ -1781,24 +1802,34 @@
                     <div class="carousel-container">
                       <div class="carousel-track" id="debtCarouselTrack">
                         <div class="carousel-slide active">
-                          <h3>1. Global Wealth Built on Borrowed Capital</h3>
-                          <p>Modern economies thrive on leverage. Governments issue bonds, corporations finance expansion with loans, and households use credit to buy homes, cars, and education. Debt is often the engine of fortune creation—fueling innovation, infrastructure, and consumerism. Without debt, globalization and rapid economic growth would likely have unfolded much slower.</p>
+                          <div class="slide-inner">
+                            <h3>1. Global Wealth Built on Borrowed Capital</h3>
+                            <p>Modern economies thrive on leverage. Governments issue bonds, corporations finance expansion with loans, and households use credit to buy homes, cars, and education. Debt is often the engine of fortune creation—fueling innovation, infrastructure, and consumerism. Without debt, globalization and rapid economic growth would likely have unfolded much slower.</p>
+                          </div>
                         </div>
                         <div class="carousel-slide">
-                          <h3>2. Debt as a Tool of Control</h3>
-                          <p>But debt isn't neutral. For poorer nations, "Debt Fortunes" often means dependence on richer creditors—through IMF or World Bank loans that come with structural conditions. This creates a cycle where fortunes in the Global North are sustained by perpetual repayment burdens in the Global South. On an individual scale, credit card debt, student loans, and predatory lending keep many locked into wage dependency.</p>
+                          <div class="slide-inner">
+                            <h3>2. Debt as a Tool of Control</h3>
+                            <p>But debt isn't neutral. For poorer nations, "Debt Fortunes" often means dependence on richer creditors—through IMF or World Bank loans that come with structural conditions. This creates a cycle where fortunes in the Global North are sustained by perpetual repayment burdens in the Global South. On an individual scale, credit card debt, student loans, and predatory lending keep many locked into wage dependency.</p>
+                          </div>
                         </div>
                         <div class="carousel-slide">
-                          <h3>3. Cultural Fortunes of Debt</h3>
-                          <p>In many cultures, debt carries stigma, while in others (like the U.S.) it's normalized—even celebrated as part of the "American Dream." This cultural acceptance turns debt into a status signal: mortgages imply ownership, venture debt implies ambition. Fortunes are built on a kind of collective agreement that tomorrow's wealth will pay for today's spending.</p>
+                          <div class="slide-inner">
+                            <h3>3. Cultural Fortunes of Debt</h3>
+                            <p>In many cultures, debt carries stigma, while in others (like the U.S.) it's normalized—even celebrated as part of the "American Dream." This cultural acceptance turns debt into a status signal: mortgages imply ownership, venture debt implies ambition. Fortunes are built on a kind of collective agreement that tomorrow's wealth will pay for today's spending.</p>
+                          </div>
                         </div>
                         <div class="carousel-slide">
-                          <h3>4. The Fragile Line Between Fortune & Collapse</h3>
-                          <p>Debt magnifies fortunes but also magnifies collapses. The 2008 financial crisis showed how debt-fueled housing markets could create immense wealth for some and destroy lives for others. Globally, a sudden shift—like rising interest rates—can turn "debt fortunes" into "debt tragedies" overnight.</p>
+                          <div class="slide-inner">
+                            <h3>4. The Fragile Line Between Fortune & Collapse</h3>
+                            <p>Debt magnifies fortunes but also magnifies collapses. The 2008 financial crisis showed how debt-fueled housing markets could create immense wealth for some and destroy lives for others. Globally, a sudden shift—like rising interest rates—can turn "debt fortunes" into "debt tragedies" overnight.</p>
+                          </div>
                         </div>
                         <div class="carousel-slide">
-                          <h3>5. Philosophical Dimension</h3>
-                          <p>On a societal level, "Debt Fortunes" reflects how humanity has tethered its sense of progress to a future that doesn't yet exist. We spend tomorrow's money to live better today. Fortune, then, isn't about what we own now, but about the gamble that tomorrow will let us pay for today's ambition.</p>
+                          <div class="slide-inner">
+                            <h3>5. Philosophical Dimension</h3>
+                            <p>On a societal level, "Debt Fortunes" reflects how humanity has tethered its sense of progress to a future that doesn't yet exist. We spend tomorrow's money to live better today. Fortune, then, isn't about what we own now, but about the gamble that tomorrow will let us pay for today's ambition.</p>
+                          </div>
                         </div>
                       </div>
                     </div>

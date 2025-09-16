@@ -9,6 +9,10 @@ externalPort = 80
 localPort = 33203
 externalPort = 3000
 
+[[ports]]
+localPort = 35113
+externalPort = 3001
+
 [agent]
 expertMode = true
 integrations = ["replitmail:1.0.0"]
