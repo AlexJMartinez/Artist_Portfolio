@@ -5,10 +5,6 @@ modules = ["nodejs-20"]
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 37153
-externalPort = 3000
-
 [agent]
 expertMode = true
 integrations = ["replitmail:1.0.0"]
