@@ -1094,6 +1094,187 @@
           transition: none;
         }
       }
+
+      /* ===== DEBT FORTUNES CAROUSEL ===== */
+      .debt-fortunes-carousel {
+        margin-top: 3rem;
+        max-width: 100%;
+      }
+
+      .carousel-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        min-height: 300px;
+      }
+
+      .carousel-track {
+        display: flex;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        will-change: transform;
+      }
+
+      .carousel-slide {
+        min-width: 100%;
+        flex-shrink: 0;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+
+      .carousel-slide.active {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .carousel-slide h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: #333;
+        font-weight: 600;
+      }
+
+      .carousel-slide p {
+        line-height: 1.6;
+        margin: 0;
+        color: #555;
+      }
+
+      .carousel-nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .carousel-btn {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+        color: #333;
+      }
+
+      .carousel-btn:hover {
+        background: rgba(230, 57, 70, 0.1);
+        border-color: #e63946;
+        color: #e63946;
+        transform: scale(1.1);
+      }
+
+      .carousel-btn:active {
+        transform: scale(0.95);
+      }
+
+      .carousel-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .carousel-dots {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .dot.active {
+        background: #e63946;
+        transform: scale(1.2);
+      }
+
+      .dot:hover {
+        background: rgba(230, 57, 70, 0.6);
+        transform: scale(1.1);
+      }
+
+      /* Mobile optimizations */
+      @media (max-width: 768px) {
+        .debt-fortunes-carousel {
+          margin-top: 2rem;
+        }
+
+        .carousel-container {
+          padding: 1.5rem;
+          min-height: 280px;
+        }
+
+        .carousel-slide h3 {
+          font-size: 1.1rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .carousel-slide p {
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+
+        .carousel-nav {
+          gap: 1rem;
+        }
+
+        .carousel-btn {
+          width: 40px;
+          height: 40px;
+          font-size: 1.3rem;
+        }
+
+        .dot {
+          width: 10px;
+          height: 10px;
+        }
+      }
+
+      /* Touch-friendly improvements */
+      @media (hover: none) and (pointer: coarse) {
+        .carousel-btn:hover {
+          background: rgba(255, 255, 255, 0.9);
+          border-color: rgba(0, 0, 0, 0.1);
+          color: #333;
+          transform: none;
+        }
+
+        .dot:hover {
+          background: rgba(0, 0, 0, 0.2);
+          transform: none;
+        }
+
+        .dot.active {
+          transform: scale(1.1);
+        }
+      }
+
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        .carousel-track,
+        .carousel-slide,
+        .carousel-btn,
+        .dot {
+          transition: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1588,33 +1769,49 @@
                   <h2>About The Artist</h2>
                   <p>"It's no measure of health to be well adjusted to a profoundly sick society" - Jiddu Krishnamurti</p>
                   
-                  <h3>1. Global Wealth Built on Borrowed Capital</h3>
-                  <p>Modern economies thrive on leverage. Governments issue bonds, corporations finance expansion with loans, and households use credit to buy homes, cars, and education. Debt is often the engine of fortune creation—fueling innovation, infrastructure, and consumerism. Without debt, globalization and rapid economic growth would likely have unfolded much slower.</p>
-                  
-                  <p style="text-align: center; margin: 2rem 0; font-size: 1.5rem;">⸻</p>
-                  
-                  <h3>2. Debt as a Tool of Control</h3>
-                  <p>But debt isn't neutral. For poorer nations, "Debt Fortunes" often means dependence on richer creditors—through IMF or World Bank loans that come with structural conditions. This creates a cycle where fortunes in the Global North are sustained by perpetual repayment burdens in the Global South. On an individual scale, credit card debt, student loans, and predatory lending keep many locked into wage dependency.</p>
-                  
-                  <p style="text-align: center; margin: 2rem 0; font-size: 1.5rem;">⸻</p>
-                  
-                  <h3>3. Cultural Fortunes of Debt</h3>
-                  <p>In many cultures, debt carries stigma, while in others (like the U.S.) it's normalized—even celebrated as part of the "American Dream." This cultural acceptance turns debt into a status signal: mortgages imply ownership, venture debt implies ambition. Fortunes are built on a kind of collective agreement that tomorrow's wealth will pay for today's spending.</p>
-                  
-                  <p style="text-align: center; margin: 2rem 0; font-size: 1.5rem;">⸻</p>
-                  
-                  <h3>4. The Fragile Line Between Fortune & Collapse</h3>
-                  <p>Debt magnifies fortunes but also magnifies collapses. The 2008 financial crisis showed how debt-fueled housing markets could create immense wealth for some and destroy lives for others. Globally, a sudden shift—like rising interest rates—can turn "debt fortunes" into "debt tragedies" overnight.</p>
-                  
-                  <p style="text-align: center; margin: 2rem 0; font-size: 1.5rem;">⸻</p>
-                  
-                  <h3>5. Philosophical Dimension</h3>
-                  <p>On a societal level, "Debt Fortunes" reflects how humanity has tethered its sense of progress to a future that doesn't yet exist. We spend tomorrow's money to live better today. Fortune, then, isn't about what we own now, but about the gamble that tomorrow will let us pay for today's ambition.</p>
+                  <div class="debt-fortunes-carousel">
+                    <div class="carousel-container">
+                      <div class="carousel-track" id="debtCarouselTrack">
+                        <div class="carousel-slide active">
+                          <h3>1. Global Wealth Built on Borrowed Capital</h3>
+                          <p>Modern economies thrive on leverage. Governments issue bonds, corporations finance expansion with loans, and households use credit to buy homes, cars, and education. Debt is often the engine of fortune creation—fueling innovation, infrastructure, and consumerism. Without debt, globalization and rapid economic growth would likely have unfolded much slower.</p>
+                        </div>
+                        <div class="carousel-slide">
+                          <h3>2. Debt as a Tool of Control</h3>
+                          <p>But debt isn't neutral. For poorer nations, "Debt Fortunes" often means dependence on richer creditors—through IMF or World Bank loans that come with structural conditions. This creates a cycle where fortunes in the Global North are sustained by perpetual repayment burdens in the Global South. On an individual scale, credit card debt, student loans, and predatory lending keep many locked into wage dependency.</p>
+                        </div>
+                        <div class="carousel-slide">
+                          <h3>3. Cultural Fortunes of Debt</h3>
+                          <p>In many cultures, debt carries stigma, while in others (like the U.S.) it's normalized—even celebrated as part of the "American Dream." This cultural acceptance turns debt into a status signal: mortgages imply ownership, venture debt implies ambition. Fortunes are built on a kind of collective agreement that tomorrow's wealth will pay for today's spending.</p>
+                        </div>
+                        <div class="carousel-slide">
+                          <h3>4. The Fragile Line Between Fortune & Collapse</h3>
+                          <p>Debt magnifies fortunes but also magnifies collapses. The 2008 financial crisis showed how debt-fueled housing markets could create immense wealth for some and destroy lives for others. Globally, a sudden shift—like rising interest rates—can turn "debt fortunes" into "debt tragedies" overnight.</p>
+                        </div>
+                        <div class="carousel-slide">
+                          <h3>5. Philosophical Dimension</h3>
+                          <p>On a societal level, "Debt Fortunes" reflects how humanity has tethered its sense of progress to a future that doesn't yet exist. We spend tomorrow's money to live better today. Fortune, then, isn't about what we own now, but about the gamble that tomorrow will let us pay for today's ambition.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="carousel-nav">
+                      <button class="carousel-btn prev" id="debtCarouselPrev">‹</button>
+                      <div class="carousel-dots" id="debtCarouselDots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                      </div>
+                      <button class="carousel-btn next" id="debtCarouselNext">›</button>
+                    </div>
+                  </div>
                 </div>
               </section>
               ${token ? `<div class="upload"><h3>Update About</h3><input type="file" id="aboutUpload"></div>` : ""}`;
             closeMenuOnLinkClick();
             initWavyImage(data.image || "https://picsum.photos/500");
+            initDebtCarousel(); // Initialize the carousel
 
             if (token) {
               document
@@ -2410,6 +2607,174 @@
             openLightbox(mediaItems[currentIndex]);
           }
         });
+
+        /* ===== Debt Fortunes Carousel ===== */
+        function initDebtCarousel() {
+          const track = document.getElementById('debtCarouselTrack');
+          const slides = document.querySelectorAll('.carousel-slide');
+          const prevBtn = document.getElementById('debtCarouselPrev');
+          const nextBtn = document.getElementById('debtCarouselNext');
+          const dots = document.querySelectorAll('.carousel-dots .dot');
+          
+          if (!track || !slides.length) return;
+
+          let currentSlide = 0;
+          let startX = 0;
+          let isDragging = false;
+          const totalSlides = slides.length;
+
+          function updateCarousel(animate = true) {
+            const translateX = -currentSlide * 100;
+            
+            if (animate) {
+              track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+            } else {
+              track.style.transition = 'none';
+            }
+            
+            track.style.transform = `translateX(${translateX}%)`;
+
+            // Update slide states
+            slides.forEach((slide, index) => {
+              slide.classList.toggle('active', index === currentSlide);
+            });
+
+            // Update dots
+            dots.forEach((dot, index) => {
+              dot.classList.toggle('active', index === currentSlide);
+            });
+
+            // Update button states
+            if (prevBtn && nextBtn) {
+              prevBtn.disabled = currentSlide === 0;
+              nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+          }
+
+          function goToSlide(index) {
+            currentSlide = Math.max(0, Math.min(index, totalSlides - 1));
+            updateCarousel();
+          }
+
+          function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+              currentSlide++;
+              updateCarousel();
+            }
+          }
+
+          function prevSlide() {
+            if (currentSlide > 0) {
+              currentSlide--;
+              updateCarousel();
+            }
+          }
+
+          // Button event listeners
+          if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+          if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+
+          // Dots event listeners
+          dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => goToSlide(index));
+          });
+
+          // Touch/Swipe support for mobile
+          let touchStartX = 0;
+          let touchEndX = 0;
+          let touchStartTime = 0;
+
+          function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartTime = Date.now();
+            isDragging = true;
+            track.style.transition = 'none';
+          }
+
+          function handleTouchMove(e) {
+            if (!isDragging) return;
+            
+            const touchCurrentX = e.touches[0].clientX;
+            const diffX = touchCurrentX - touchStartX;
+            const translateX = -currentSlide * 100 + (diffX / track.offsetWidth) * 100;
+            track.style.transform = `translateX(${translateX}%)`;
+          }
+
+          function handleTouchEnd(e) {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            touchEndX = e.changedTouches[0].clientX;
+            const touchDuration = Date.now() - touchStartTime;
+            const swipeDistance = Math.abs(touchEndX - touchStartX);
+            const swipeVelocity = swipeDistance / touchDuration;
+
+            // Determine if it's a valid swipe (minimum distance and reasonable velocity)
+            const minSwipeDistance = 50;
+            const minSwipeVelocity = 0.1;
+            
+            if (swipeDistance >= minSwipeDistance && swipeVelocity >= minSwipeVelocity) {
+              if (touchEndX < touchStartX - minSwipeDistance) {
+                // Swipe left - next slide
+                nextSlide();
+              } else if (touchEndX > touchStartX + minSwipeDistance) {
+                // Swipe right - previous slide
+                prevSlide();
+              } else {
+                // Not enough swipe, return to current slide
+                updateCarousel();
+              }
+            } else {
+              // Not a swipe, return to current slide
+              updateCarousel();
+            }
+          }
+
+          // Add touch event listeners
+          if (track) {
+            track.addEventListener('touchstart', handleTouchStart, { passive: false });
+            track.addEventListener('touchmove', handleTouchMove, { passive: false });
+            track.addEventListener('touchend', handleTouchEnd, { passive: false });
+          }
+
+          // Keyboard navigation
+          document.addEventListener('keydown', (e) => {
+            // Only handle keys when carousel is visible
+            const carousel = document.querySelector('.debt-fortunes-carousel');
+            if (!carousel || !carousel.offsetParent) return;
+
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              prevSlide();
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              nextSlide();
+            }
+          });
+
+          // Auto-advance carousel (optional - uncomment if desired)
+          // let autoAdvanceInterval;
+          // function startAutoAdvance() {
+          //   autoAdvanceInterval = setInterval(() => {
+          //     if (currentSlide < totalSlides - 1) {
+          //       nextSlide();
+          //     } else {
+          //       goToSlide(0);
+          //     }
+          //   }, 8000);
+          // }
+          // 
+          // function stopAutoAdvance() {
+          //   clearInterval(autoAdvanceInterval);
+          // }
+          // 
+          // startAutoAdvance();
+          // track.addEventListener('mouseenter', stopAutoAdvance);
+          // track.addEventListener('mouseleave', startAutoAdvance);
+
+          // Initialize
+          updateCarousel(false);
+        }
 
         /* ===== Floating Navigation ===== */
         function initFloatingNav() {
