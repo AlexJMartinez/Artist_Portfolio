@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>Alex Martínez – Artist</title>
     <link
       rel="stylesheet"
@@ -17,7 +20,7 @@
     <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    
+
     <!-- Remove preload to avoid duplicate fetches since stylesheets are already linked above -->
     <style>
       body {
@@ -1613,8 +1616,8 @@
 
           view.addEventListener("mouseenter", () => {
             gsap.to(displacementFilter.scale, {
-              x: 0,
-              y: 0,
+              x: 60,
+              y: 60,
               duration: 1,
               ease: "power2.out",
             });
@@ -2642,27 +2645,31 @@
 
         /* ===== Debt Fortunes Carousel ===== */
         function initDebtCarousel() {
-          const track = document.getElementById('debtCarouselTrack');
-          const slides = document.querySelectorAll('.debt-fortunes-carousel .carousel-slide');
-          const prevBtn = document.getElementById('debtCarouselPrev');
-          const nextBtn = document.getElementById('debtCarouselNext');
-          const dots = document.querySelectorAll('#debtCarouselDots .dot');
-          
-          console.log('Carousel Init:', { 
-            track: !!track, 
-            slidesCount: slides.length, 
-            prevBtn: !!prevBtn, 
-            nextBtn: !!nextBtn, 
-            dotsCount: dots.length 
+          const track = document.getElementById("debtCarouselTrack");
+          const slides = document.querySelectorAll(
+            ".debt-fortunes-carousel .carousel-slide",
+          );
+          const prevBtn = document.getElementById("debtCarouselPrev");
+          const nextBtn = document.getElementById("debtCarouselNext");
+          const dots = document.querySelectorAll("#debtCarouselDots .dot");
+
+          console.log("Carousel Init:", {
+            track: !!track,
+            slidesCount: slides.length,
+            prevBtn: !!prevBtn,
+            nextBtn: !!nextBtn,
+            dotsCount: dots.length,
           });
-          
+
           if (!track || slides.length === 0) {
-            console.error('Carousel elements not found!');
+            console.error("Carousel elements not found!");
             // Force show first slide with CSS if JS fails
-            const firstSlide = document.querySelector('.debt-fortunes-carousel .carousel-slide');
+            const firstSlide = document.querySelector(
+              ".debt-fortunes-carousel .carousel-slide",
+            );
             if (firstSlide) {
-              firstSlide.style.opacity = '1';
-              firstSlide.style.transform = 'translateX(0)';
+              firstSlide.style.opacity = "1";
+              firstSlide.style.transform = "translateX(0)";
             }
             return;
           }
@@ -2674,23 +2681,24 @@
 
           function updateCarousel(animate = true) {
             const translateX = -currentSlide * 100;
-            
+
             if (animate) {
-              track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+              track.style.transition =
+                "transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)";
             } else {
-              track.style.transition = 'none';
+              track.style.transition = "none";
             }
-            
+
             track.style.transform = `translateX(${translateX}%)`;
 
             // Update slide states
             slides.forEach((slide, index) => {
-              slide.classList.toggle('active', index === currentSlide);
+              slide.classList.toggle("active", index === currentSlide);
             });
 
             // Update dots
             dots.forEach((dot, index) => {
-              dot.classList.toggle('active', index === currentSlide);
+              dot.classList.toggle("active", index === currentSlide);
             });
 
             // Update button states
@@ -2720,12 +2728,12 @@
           }
 
           // Button event listeners
-          if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-          if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+          if (nextBtn) nextBtn.addEventListener("click", nextSlide);
+          if (prevBtn) prevBtn.addEventListener("click", prevSlide);
 
           // Dots event listeners
           dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => goToSlide(index));
+            dot.addEventListener("click", () => goToSlide(index));
           });
 
           // Touch/Swipe support for mobile
@@ -2737,21 +2745,22 @@
             touchStartX = e.touches[0].clientX;
             touchStartTime = Date.now();
             isDragging = true;
-            track.style.transition = 'none';
+            track.style.transition = "none";
           }
 
           function handleTouchMove(e) {
             if (!isDragging) return;
-            
+
             const touchCurrentX = e.touches[0].clientX;
             const diffX = touchCurrentX - touchStartX;
-            const translateX = -currentSlide * 100 + (diffX / track.offsetWidth) * 100;
+            const translateX =
+              -currentSlide * 100 + (diffX / track.offsetWidth) * 100;
             track.style.transform = `translateX(${translateX}%)`;
           }
 
           function handleTouchEnd(e) {
             if (!isDragging) return;
-            
+
             isDragging = false;
             touchEndX = e.changedTouches[0].clientX;
             const touchDuration = Date.now() - touchStartTime;
@@ -2761,8 +2770,11 @@
             // Determine if it's a valid swipe (minimum distance and reasonable velocity)
             const minSwipeDistance = 50;
             const minSwipeVelocity = 0.1;
-            
-            if (swipeDistance >= minSwipeDistance && swipeVelocity >= minSwipeVelocity) {
+
+            if (
+              swipeDistance >= minSwipeDistance &&
+              swipeVelocity >= minSwipeVelocity
+            ) {
               if (touchEndX < touchStartX - minSwipeDistance) {
                 // Swipe left - next slide
                 nextSlide();
@@ -2781,21 +2793,27 @@
 
           // Add touch event listeners
           if (track) {
-            track.addEventListener('touchstart', handleTouchStart, { passive: false });
-            track.addEventListener('touchmove', handleTouchMove, { passive: false });
-            track.addEventListener('touchend', handleTouchEnd, { passive: false });
+            track.addEventListener("touchstart", handleTouchStart, {
+              passive: false,
+            });
+            track.addEventListener("touchmove", handleTouchMove, {
+              passive: false,
+            });
+            track.addEventListener("touchend", handleTouchEnd, {
+              passive: false,
+            });
           }
 
           // Keyboard navigation
-          document.addEventListener('keydown', (e) => {
+          document.addEventListener("keydown", (e) => {
             // Only handle keys when carousel is visible
-            const carousel = document.querySelector('.debt-fortunes-carousel');
+            const carousel = document.querySelector(".debt-fortunes-carousel");
             if (!carousel || !carousel.offsetParent) return;
 
-            if (e.key === 'ArrowLeft') {
+            if (e.key === "ArrowLeft") {
               e.preventDefault();
               prevSlide();
-            } else if (e.key === 'ArrowRight') {
+            } else if (e.key === "ArrowRight") {
               e.preventDefault();
               nextSlide();
             }
@@ -2812,11 +2830,11 @@
           //     }
           //   }, 8000);
           // }
-          // 
+          //
           // function stopAutoAdvance() {
           //   clearInterval(autoAdvanceInterval);
           // }
-          // 
+          //
           // startAutoAdvance();
           // track.addEventListener('mouseenter', stopAutoAdvance);
           // track.addEventListener('mouseleave', startAutoAdvance);
