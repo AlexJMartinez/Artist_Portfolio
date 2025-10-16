@@ -131,3 +131,6 @@ dist
 
 # Replit debugger
 .breakpoints
+# media
+uploads/portfolio/*.mov
+uploads/portfolio/**/*.mov
