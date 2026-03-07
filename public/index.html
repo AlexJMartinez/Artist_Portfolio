@@ -413,35 +413,42 @@
       @media (max-width: 900px) {
         .gallery {
           column-count: 2;
+          column-gap: 1.5rem;
         }
       }
 
-      /* ===== MOBILE: masonry layout with 2 columns ===== */
-      @media (max-width: 600px) {
+      /* ===== MOBILE: 2-column masonry ===== */
+      @media (max-width: 768px) {
         .gallery {
           column-count: 2;
-          column-gap: 1rem;
-          padding: 0 1rem;
+          column-gap: 0.75rem;
         }
 
         .gallery-item {
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
         }
-
-        /* gentle stagger so rows don’t pop all at once */
 
         .gallery-item:hover {
           transform: none;
           box-shadow: none;
         }
+      }
 
-        /* Respect reduced motion on mobile */
-        @media (prefers-reduced-motion: reduce) {
-          .gallery-item {
-            animation: none;
-            opacity: 1;
-            transform: none;
-          }
+      /* ===== NARROW PHONE: single-column full-width ===== */
+      @media (max-width: 500px) {
+        .gallery {
+          column-count: 1;
+          column-gap: 0;
+        }
+
+        .gallery-item {
+          margin-bottom: 1.5rem;
+        }
+
+        .gallery-item img,
+        .gallery-item video {
+          border-radius: 8px;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         }
       }
 
@@ -449,6 +456,14 @@
         .gallery-item:hover {
           transform: none;
           box-shadow: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .gallery-item {
+          animation: none;
+          opacity: 1;
+          transform: none;
         }
       }
 
@@ -904,12 +919,12 @@
         position: relative;
         display: grid;
         place-items: center;
-        width: 44px;
-        height: 44px;
-        margin: 0 2px;
+        width: 56px;
+        height: 56px;
+        margin: 0 4px;
         border-radius: 50%;
         color: #666;
-        font-size: 18px;
+        font-size: 22px;
         text-decoration: none;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -943,8 +958,8 @@
         position: absolute;
         top: 8px;
         left: 0;
-        width: 44px;
-        height: 44px;
+        width: 56px;
+        height: 56px;
         background: #e63946;
         border-radius: 50%;
         transform: translateX(0);
