@@ -362,6 +362,56 @@
         margin-top: 0.5rem;
       }
 
+      /* ===== SKELETON LOADING ===== */
+      .skeleton-gallery {
+        column-count: 3;
+        column-gap: 2rem;
+      }
+      @media (max-width: 900px) { .skeleton-gallery { column-count: 2; } }
+      @media (max-width: 500px) { .skeleton-gallery { column-count: 1; } }
+      .skeleton-item {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+        background: linear-gradient(90deg, #ececec 25%, #ddd 50%, #ececec 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+      }
+      .skeleton-item:nth-child(1) { height: 260px; }
+      .skeleton-item:nth-child(2) { height: 180px; }
+      .skeleton-item:nth-child(3) { height: 220px; }
+      .skeleton-item:nth-child(4) { height: 200px; }
+      .skeleton-item:nth-child(5) { height: 240px; }
+      .skeleton-item:nth-child(6) { height: 170px; }
+      @keyframes shimmer {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      /* ===== VIDEO PLACEHOLDER ===== */
+      .video-placeholder {
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        background: #111;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .video-placeholder .play-icon {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 2.8rem;
+        pointer-events: none;
+        transition: color 0.2s, transform 0.2s;
+      }
+      .video-placeholder:hover .play-icon {
+        color: #fff;
+        transform: scale(1.12);
+      }
+
       /* ===== PORTFOLIO ===== */
       .portfolio-wrapper {
         max-width: 1000px;
@@ -1820,6 +1870,19 @@
           }
 
           if (page === "portfolio") {
+            // Show skeleton immediately before fetch resolves
+            content.innerHTML = `
+              <section class="portfolio-wrapper">
+                <div class="skeleton-gallery">
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                </div>
+              </section>`;
+
             const res = await fetch("/portfolio-images");
             const gallery = await res.json();
             content.innerHTML = `
@@ -1828,15 +1891,13 @@
                   ${gallery
                     .map((item) => {
                       const ext = item.url.split(".").pop().toLowerCase();
-                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(
-                        ext,
-                      );
+                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
                       return `
                       <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
                         ${
                           isVideo
-                            ? `<video src="${item.url}" muted loop playsinline preload="none" loading="lazy"></video>`
-                            : `<img src="${item.url}" alt="Artwork" loading="lazy" decoding="async">`
+                            ? `<div class="video-placeholder" data-src="${item.url}"><i class="fas fa-play-circle play-icon"></i></div>`
+                            : `<img data-src="${item.url}" alt="Artwork" decoding="async">`
                         }
                         ${item.caption ? `<div class="caption"></div>` : ""}
                         ${
@@ -1890,40 +1951,49 @@
             if (shouldShuffle)
               shuffleInterval = setInterval(shuffleGallery, 10000);
 
-            mediaItems = Array.from(
-              document.querySelectorAll(
-                ".gallery-item img, .gallery-item video",
-              ),
-            );
-            // Setup Intersection Observer for lazy video loading
-            const videoObserver = new IntersectionObserver(
+            // IntersectionObserver: load images progressively as they scroll into view
+            const imgObserver = new IntersectionObserver(
               (entries) => {
                 entries.forEach((entry) => {
                   if (entry.isIntersecting) {
-                    const vid = entry.target;
-                    vid.muted = true;
-                    vid.loop = true;
-                    vid.playsInline = true;
-                    vid.load(); // Start loading the video
-                    vid.addEventListener(
-                      "loadeddata",
-                      () => {
-                        vid.play().catch(() => {});
-                      },
-                      { once: true },
-                    );
-                    videoObserver.unobserve(vid); // Stop observing once loaded
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                      img.src = img.dataset.src;
+                      img.removeAttribute("data-src");
+                    }
+                    imgObserver.unobserve(img);
                   }
                 });
               },
-              {
-                rootMargin: "50px", // Start loading 50px before the video enters viewport
-              },
+              { rootMargin: "200px" }
             );
-
-            document.querySelectorAll(".gallery-item video").forEach((vid) => {
-              videoObserver.observe(vid);
+            document.querySelectorAll(".gallery-item img[data-src]").forEach((img) => {
+              imgObserver.observe(img);
             });
+
+            // Video placeholders: swap in real <video> element on click
+            document.querySelector(".gallery").addEventListener("click", (e) => {
+              const placeholder = e.target.closest(".video-placeholder");
+              if (!placeholder) return;
+              const src = placeholder.dataset.src;
+              if (!src) return;
+              const video = document.createElement("video");
+              video.src = src;
+              video.muted = true;
+              video.loop = true;
+              video.playsInline = true;
+              video.controls = true;
+              video.autoplay = true;
+              video.style.width = "100%";
+              video.style.borderRadius = "6px";
+              video.style.display = "block";
+              placeholder.replaceWith(video);
+              video.play().catch(() => {});
+            });
+
+            mediaItems = Array.from(
+              document.querySelectorAll(".gallery-item img"),
+            );
             mediaItems.forEach((el, idx) =>
               el.addEventListener("click", () => {
                 currentIndex = idx;
@@ -1937,7 +2007,11 @@
                 .forEach((item) => {
                   const btn = item.querySelector(".delete-btn");
                   const media = item.querySelector("img, video");
-                  if (media && btn) {
+                  const placeholder = item.querySelector(".video-placeholder");
+                  if (btn && placeholder) {
+                    // Dark background placeholder — always use white icon
+                    btn.style.color = "#fff";
+                  } else if (media && btn) {
                     const canvas = document.createElement("canvas");
                     const ctx = canvas.getContext("2d");
                     function runCheck() {

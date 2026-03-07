@@ -10,9 +10,10 @@ Preferred communication style: Simple, everyday language.
 
 ## Frontend Architecture
 - **Single Page Application (SPA)**: Built with vanilla JavaScript and HTML, using client-side routing to navigate between Home, About, Portfolio, and Login sections
-- **Styling Framework**: PicoCSS for clean, minimal design with custom CSS animations including gradient backgrounds and GSAP animations
-- **Interactive Elements**: Font Awesome icons and PIXI.js for enhanced visual effects
+- **Styling Framework**: PicoCSS for clean, minimal design with custom CSS animations
+- **Interactive Elements**: Font Awesome icons for UI elements
 - **Authentication State**: Client-side token management for admin login sessions
+- **Portfolio Performance**: Skeleton shimmer loading screen, IntersectionObserver for progressive image loading (data-src → src), video click-to-load placeholders to avoid downloading large MP4s upfront
 
 ## Backend Architecture
 - **Express.js Server**: RESTful API endpoints for portfolio management, file uploads, authentication, and subscriber management
@@ -34,11 +35,11 @@ Preferred communication style: Simple, everyday language.
 ## Core Frameworks
 - **Express.js**: Web application framework for Node.js backend
 - **PicoCSS**: Minimal CSS framework for responsive design
-- **GSAP**: Animation library for smooth transitions and effects
-- **PIXI.js**: 2D graphics rendering engine for interactive elements
+- **GSAP**: Animation library for smooth transitions and effects (loaded on-demand)
 
 ## File Handling
 - **Multer**: Multipart form data handling for file uploads
+- **Sharp**: Server-side image compression — resizes uploads to max 1400px wide at JPEG quality 82. Runs on every image upload and was used to retroactively compress existing large files.
 - **Express-fileupload**: Alternative file upload middleware
 
 ## Authentication & Security

@@ -10,6 +10,7 @@ const { Pool } = require("pg");
 const crypto = require("crypto");
 const compression = require("compression");
 const sanitizeHtml = require("sanitize-html");
+const sharp = require("sharp");
 // Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
 
@@ -206,6 +207,22 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Compress uploaded images in-place using sharp
+async function compressImage(filePath, mimetype) {
+  if (!mimetype || !mimetype.startsWith("image/")) return;
+  try {
+    const tmp = filePath + ".tmp";
+    await sharp(filePath)
+      .resize({ width: 1400, withoutEnlargement: true })
+      .jpeg({ quality: 82 })
+      .toFile(tmp);
+    fs.renameSync(tmp, filePath);
+  } catch (err) {
+    console.error("Image compression failed:", err.message);
+    // Non-fatal: keep original file if compression fails
+  }
+}
+
 // Multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -340,11 +357,14 @@ app.post(
 );
 
 // ---- ABOUT ---- //
-app.post("/upload/about", auth, upload.single("file"), (req, res) => {
+app.post("/upload/about", auth, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
+
+    const filePath = path.join(__dirname, "uploads", "about", req.file.filename);
+    await compressImage(filePath, req.file.mimetype);
 
     const fileUrl = `/uploads/about/${req.file.filename}`;
     const aboutData = { image: fileUrl, uploadedAt: new Date().toISOString() };
@@ -390,6 +410,10 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
       const data = fs.readFileSync(portfolioFile, "utf8");
       portfolio = JSON.parse(data);
     }
+
+    // Compress image uploads in-place before saving metadata
+    const filePath = path.join(__dirname, "uploads", "portfolio", req.file.filename);
+    await compressImage(filePath, req.file.mimetype);
 
     const newItem = {
       id: Date.now(),
