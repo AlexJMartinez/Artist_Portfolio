@@ -119,14 +119,11 @@
 
       /* Tools page layout */
       .tools {
-        /* keep your centered page header */
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        min-height: calc(100vh - 160px);
         text-align: center;
-        padding: 4rem 1rem;
+        padding: 0 1rem;
       }
 
       /* shared width for both grids + their labels */
@@ -262,9 +259,8 @@
         min-height: 80vh;
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
-        padding: 6rem 2rem;
+        padding: 0 2rem;
       }
       .hero h1 {
         font-size: clamp(3rem, 8vw, 6rem);
@@ -336,40 +332,8 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         gap: 2rem;
         text-align: center;
-        min-height: 80vh;
-      }
-      #about-canvas {
-        position: relative;
-        width: 400px;
-        height: 400px;
-        margin: 0 auto;
-        overflow: visible;
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 300ms ease;
-        will-change: opacity;
-      }
-      #about-canvas:not(:empty) {
-        opacity: 1;
-      }
-      #about-canvas canvas {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 800px;
-        height: 800px;
-        transform: translate(-50%, -50%);
-        pointer-events: auto;
-        z-index: 2;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        #about-canvas {
-          transition: none;
-          opacity: 1;
-        }
       }
       .about-text {
         max-width: 700px;
@@ -396,7 +360,7 @@
       /* ===== PORTFOLIO ===== */
       .portfolio-wrapper {
         max-width: 1000px;
-        margin: 6rem auto 0 auto;
+        margin: 0 auto;
         min-height: 100vh;
       }
       .gallery {
@@ -740,8 +704,7 @@
       .login-container {
         display: flex;
         justify-content: center;
-        align-items: center;
-        min-height: calc(100vh - 80px);
+        align-items: flex-start;
         box-sizing: border-box;
         padding: 0;
       }
@@ -863,14 +826,6 @@
       }
 
       /* ===== RESPONSIVE UTIL ===== */
-      #about-canvas {
-        width: clamp(260px, 60vw, 400px);
-        height: clamp(260px, 60vw, 400px);
-      }
-      #about-canvas canvas {
-        width: 200%;
-        height: 200%;
-      }
       html,
       body {
         overflow-x: hidden;
@@ -894,7 +849,7 @@
           padding-bottom: 7rem; /* Extra space for floating nav */
         }
         .hero {
-          padding: 4rem 1rem;
+          padding: 0 1rem;
           min-height: 70vh;
         }
         .about-text {
@@ -1477,7 +1432,6 @@
 
         /* ===== Dynamic Library Loading ===== */
         let gsapLoaded = false;
-        let pixiLoaded = false;
 
         async function loadGSAP() {
           if (gsapLoaded || window.gsap) return;
@@ -1491,164 +1445,6 @@
             };
             script.onerror = reject;
             document.head.appendChild(script);
-          });
-        }
-
-        async function loadPIXI() {
-          if (pixiLoaded || window.PIXI) return;
-          return new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src =
-              "https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.2.4/pixi.min.js";
-            script.onload = () => {
-              pixiLoaded = true;
-              resolve();
-            };
-            script.onerror = reject;
-            document.head.appendChild(script);
-          });
-        }
-
-        /* ===== About PIXI ===== */
-        let aboutPixiApp = null;
-        async function initWavyImage(imageUrl) {
-          // Load PIXI and GSAP dynamically only when needed
-          await Promise.all([loadPIXI(), loadGSAP()]);
-
-          if (aboutPixiApp) {
-            aboutPixiApp.destroy(true, {
-              children: true,
-              texture: true,
-              baseTexture: true,
-            });
-            aboutPixiApp = null;
-          }
-          const visibleSize = 400,
-            canvasSize = 800;
-
-          aboutPixiApp = new PIXI.Application({
-            width: canvasSize,
-            height: canvasSize,
-            backgroundAlpha: 0,
-            antialias: true,
-            autoDensity: true,
-            resolution: window.devicePixelRatio || 3,
-            autoStart: false,
-          });
-
-          const view = aboutPixiApp.view;
-          view.style.width = "200%";
-          view.style.height = "200%";
-          view.style.opacity = "0";
-
-          const container = new PIXI.Container();
-          aboutPixiApp.stage.addChild(container);
-
-          const img = PIXI.Sprite.from(imageUrl);
-          img.anchor.set(0.5);
-          img.x = canvasSize / 2;
-          img.y = canvasSize / 2;
-          img.width = visibleSize;
-          img.height = visibleSize;
-          container.addChild(img);
-
-          const res = aboutPixiApp.renderer.resolution;
-          const feather = 2;
-          const maskCanvas = document.createElement("canvas");
-          maskCanvas.width = canvasSize * res;
-          maskCanvas.height = canvasSize * res;
-          const ctx = maskCanvas.getContext("2d");
-          const cx = (canvasSize / 2) * res,
-            cy = (canvasSize / 2) * res,
-            r = (visibleSize / 2) * res;
-          const grd = ctx.createRadialGradient(
-            cx,
-            cy,
-            r - feather * res,
-            cx,
-            cy,
-            r,
-          );
-          grd.addColorStop(0, "rgba(255,255,255,1)");
-          grd.addColorStop(1, "rgba(255,255,255,0)");
-          ctx.fillStyle = grd;
-          ctx.beginPath();
-          ctx.arc(cx, cy, r, 0, Math.PI * 2);
-          ctx.fill();
-
-          const maskSprite = PIXI.Sprite.from(maskCanvas);
-          maskSprite.anchor.set(0.5);
-          maskSprite.x = canvasSize / 2;
-          maskSprite.y = canvasSize / 2;
-          maskSprite.scale.set(1 / res);
-          container.addChild(maskSprite);
-          maskSprite.renderable = false;
-          container.mask = maskSprite;
-
-          const displacementSprite = PIXI.Sprite.from("/noise.jpeg");
-          displacementSprite.texture.baseTexture.wrapMode =
-            PIXI.WRAP_MODES.REPEAT;
-          displacementSprite.width = canvasSize;
-          displacementSprite.height = canvasSize;
-          displacementSprite.alpha = 0;
-          aboutPixiApp.stage.addChild(displacementSprite);
-
-          const displacementFilter = new PIXI.filters.DisplacementFilter(
-            displacementSprite,
-          );
-          displacementFilter.padding = 200;
-          displacementFilter.autoFit = false;
-          container.filterArea = new PIXI.Rectangle(
-            0,
-            0,
-            canvasSize,
-            canvasSize,
-          );
-          container.filters = [displacementFilter];
-          displacementFilter.scale.set(60);
-
-          let t = 0;
-          aboutPixiApp.ticker.add(() => {
-            t += 0.01;
-            displacementSprite.x = Math.sin(t) * 60;
-            displacementSprite.y = Math.cos(t) * 60;
-          });
-
-          view.addEventListener("mouseenter", () => {
-            gsap.to(displacementFilter.scale, {
-              x: 60,
-              y: 60,
-              duration: 1,
-              ease: "power2.out",
-            });
-          });
-          view.addEventListener("mouseleave", () => {
-            gsap.to(displacementFilter.scale, {
-              x: 60,
-              y: 60,
-              duration: 1,
-              ease: "power3.out",
-            });
-          });
-
-          const waitTexture = (tex) =>
-            tex.valid
-              ? Promise.resolve()
-              : new Promise((res) => tex.once("update", res));
-          Promise.all([
-            waitTexture(img.texture),
-            waitTexture(displacementSprite.texture),
-          ]).then(() => {
-            img.width = visibleSize;
-            img.height = visibleSize;
-            aboutPixiApp.render();
-            const holder = document.getElementById("about-canvas");
-            holder.innerHTML = "";
-            holder.appendChild(view);
-            requestAnimationFrame(() => {
-              view.style.opacity = "1";
-              aboutPixiApp.start();
-            });
           });
         }
 
@@ -1789,7 +1585,6 @@
             const data = await res.json();
             content.innerHTML = `
               <section class="about">
-                <div id="about-canvas"></div>
                 <div class="about-text">
                   <h2>About The Artist</h2>
                   <p>"It's no measure of health to be well adjusted to a profoundly sick society" - Jiddu Krishnamurti</p>
@@ -1845,7 +1640,6 @@
               </section>
               ${token ? `<div class="upload"><h3>Update About</h3><input type="file" id="aboutUpload"></div>` : ""}`;
             closeMenuOnLinkClick();
-            initWavyImage(data.image || "https://picsum.photos/500");
             initDebtCarousel(); // Initialize the carousel
 
             if (token) {
