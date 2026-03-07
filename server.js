@@ -11,6 +11,7 @@ const crypto = require("crypto");
 const compression = require("compression");
 const sanitizeHtml = require("sanitize-html");
 const sharp = require("sharp");
+const { execSync } = require("child_process");
 // Using Node.js built-in fetch (Node 18+) instead of node-fetch for ESM compatibility
 require("dotenv").config();
 
@@ -223,6 +224,42 @@ async function compressImage(filePath, mimetype) {
   }
 }
 
+// Extract first frame thumbnail and dimensions from a video file using ffmpeg/ffprobe
+async function generateVideoThumbnail(videoPath) {
+  try {
+    const dir = path.dirname(videoPath);
+    const baseName = path.basename(videoPath, path.extname(videoPath));
+    const thumbFilename = `thumb_${baseName}.jpg`;
+    const thumbPath = path.join(dir, thumbFilename);
+
+    execSync(
+      `ffmpeg -y -ss 0 -i "${videoPath}" -frames:v 1 -q:v 2 "${thumbPath}"`,
+      { stdio: "pipe" }
+    );
+
+    const probeOutput = execSync(
+      `ffprobe -v quiet -print_format json -show_streams "${videoPath}"`,
+      { encoding: "utf8" }
+    );
+    const probe = JSON.parse(probeOutput);
+    const videoStream = probe.streams.find((s) => s.codec_type === "video");
+    const width = videoStream?.width || 16;
+    const height = videoStream?.height || 9;
+
+    const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+    const g = gcd(width, height);
+    const aspectRatio = `${width / g} / ${height / g}`;
+
+    const uploadsDir = path.join(__dirname, "uploads");
+    const thumbnailUrl = `/uploads/${path.relative(uploadsDir, thumbPath)}`;
+
+    return { thumbnailUrl, aspectRatio };
+  } catch (err) {
+    console.error("Thumbnail generation failed:", err.message);
+    return null;
+  }
+}
+
 // Multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -415,12 +452,26 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
     const filePath = path.join(__dirname, "uploads", "portfolio", req.file.filename);
     await compressImage(filePath, req.file.mimetype);
 
+    // For video uploads, extract first-frame thumbnail and detect aspect ratio
+    const isVideoUpload = req.file.mimetype && req.file.mimetype.startsWith("video/");
+    let thumbnailUrl = null;
+    let aspectRatio = null;
+    if (isVideoUpload) {
+      const thumbResult = await generateVideoThumbnail(filePath);
+      if (thumbResult) {
+        thumbnailUrl = thumbResult.thumbnailUrl;
+        aspectRatio = thumbResult.aspectRatio;
+      }
+    }
+
     const newItem = {
       id: Date.now(),
       url: `/uploads/portfolio/${req.file.filename}`,
       uploadedAt: new Date().toISOString(),
       fileType: req.file.mimetype,
       caption: "",
+      ...(thumbnailUrl && { thumbnailUrl }),
+      ...(aspectRatio && { aspectRatio }),
     };
 
     portfolio.push(newItem);

@@ -393,19 +393,20 @@
       /* ===== VIDEO PLACEHOLDER ===== */
       .video-placeholder {
         width: 100%;
-        aspect-ratio: 9 / 16;
-        background: #111;
+        background: #111 center / cover no-repeat;
         border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        /* aspect-ratio applied per-item via inline style */
       }
       .video-placeholder .play-icon {
-        color: rgba(255, 255, 255, 0.75);
+        color: rgba(255, 255, 255, 0.85);
         font-size: 2.8rem;
         pointer-events: none;
         transition: color 0.2s, transform 0.2s;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
       }
       .video-placeholder:hover .play-icon {
         color: #fff;
@@ -1909,7 +1910,7 @@
                       <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
                         ${
                           isVideo
-                            ? `<div class="video-placeholder" data-src="${item.url}"><i class="fas fa-play-circle play-icon"></i></div>`
+                            ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"><i class="fas fa-play-circle play-icon"></i></div>`
                             : `<img data-src="${item.url}" alt="Artwork" decoding="async">`
                         }
                         ${item.caption ? `<div class="caption"></div>` : ""}

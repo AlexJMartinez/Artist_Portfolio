@@ -21,19 +21,27 @@
   },
   {
     "id": 1757370339197,
-    "url": "/uploads/portfolio/1757370325503.mp4"
+    "url": "/uploads/portfolio/1757370325503.mp4",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1757370325503.jpg",
+    "aspectRatio": "16 / 9"
   },
   {
     "id": 1757370370001,
-    "url": "/uploads/portfolio/1757370353421.mp4"
+    "url": "/uploads/portfolio/1757370353421.mp4",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1757370353421.jpg",
+    "aspectRatio": "16 / 9"
   },
   {
     "id": 1757370416144,
-    "url": "/uploads/portfolio/1757370387709.mp4"
+    "url": "/uploads/portfolio/1757370387709.mp4",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1757370387709.jpg",
+    "aspectRatio": "16 / 9"
   },
   {
     "id": 1757370440077,
-    "url": "/uploads/portfolio/1757370428841.mp4"
+    "url": "/uploads/portfolio/1757370428841.mp4",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1757370428841.jpg",
+    "aspectRatio": "16 / 9"
   },
   {
     "id": 1757381553391,
@@ -44,20 +52,26 @@
     "url": "/uploads/portfolio/1757702302197-393174742.mp4",
     "uploadedAt": "2025-09-12T18:38:26.535Z",
     "fileType": "video/mp4",
-    "caption": ""
+    "caption": "",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1757702302197-393174742.jpg",
+    "aspectRatio": "16 / 9"
   },
   {
     "id": 1770514467202,
     "url": "/uploads/portfolio/1770514460391-745839182.mp4",
     "uploadedAt": "2026-02-08T01:34:27.202Z",
     "fileType": "video/mp4",
-    "caption": ""
+    "caption": "",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1770514460391-745839182.jpg",
+    "aspectRatio": "16 / 9"
   },
   {
     "id": 1770514492071,
     "url": "/uploads/portfolio/1770514477571-521411745.mp4",
     "uploadedAt": "2026-02-08T01:34:52.071Z",
     "fileType": "video/mp4",
-    "caption": ""
+    "caption": "",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1770514477571-521411745.jpg",
+    "aspectRatio": "16 / 9"
   }
 ]
