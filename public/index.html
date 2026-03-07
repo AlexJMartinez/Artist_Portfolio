@@ -1207,16 +1207,26 @@
         border-radius: 50%;
         width: 44px;
         height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0;
+        font-size: 1rem;
         line-height: 1;
-        padding: 0;
         cursor: pointer;
         transition: all 0.2s ease;
         user-select: none;
         color: #333;
+        box-sizing: border-box;
+      }
+
+      .carousel-btn i {
+        display: block;
+        line-height: 1;
+        font-size: 1rem;
       }
 
       .carousel-btn:hover {
@@ -1290,7 +1300,8 @@
         .carousel-btn {
           width: 40px;
           height: 40px;
-          font-size: 1.3rem;
+          min-width: 40px;
+          min-height: 40px;
         }
 
         .dot {
@@ -1697,7 +1708,7 @@
                       </div>
                     </div>
                     <div class="carousel-nav">
-                      <button class="carousel-btn prev" id="debtCarouselPrev">‹</button>
+                      <button class="carousel-btn prev" id="debtCarouselPrev"><i class="fas fa-chevron-left"></i></button>
                       <div class="carousel-dots" id="debtCarouselDots">
                         <span class="dot active" data-slide="0"></span>
                         <span class="dot" data-slide="1"></span>
@@ -1705,7 +1716,7 @@
                         <span class="dot" data-slide="3"></span>
                         <span class="dot" data-slide="4"></span>
                       </div>
-                      <button class="carousel-btn next" id="debtCarouselNext">›</button>
+                      <button class="carousel-btn next" id="debtCarouselNext"><i class="fas fa-chevron-right"></i></button>
                     </div>
                   </div>
                 </div>
