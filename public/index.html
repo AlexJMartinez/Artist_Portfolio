@@ -2294,18 +2294,25 @@
                   ${devItems.length === 0 ? `<p style="text-align:center;color:#888;grid-column:1/-1;padding:3rem 0;">No videos yet.</p>` : ""}
                   ${devItems
                     .map(
-                      (item) => `
+                      (item) => {
+                        const safeAlt = (item.title || "Development video")
+                          .replace(/&/g, "&amp;")
+                          .replace(/"/g, "&quot;")
+                          .replace(/</g, "&lt;")
+                          .replace(/>/g, "&gt;");
+                        return `
                   <div class="gallery-item dev-item ${token ? "admin" : ""}" data-id="${item.id}">
                     <a class="dev-link" href="${item.youtubeUrl}" target="_blank" rel="noopener noreferrer">
                       <img
                         src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
-                        alt="${item.title || "Development video"}"
+                        alt="${safeAlt}"
                         loading="lazy"
                       >
                       ${item.title ? `<div class="dev-title"></div>` : ""}
                     </a>
                     ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
-                  </div>`
+                  </div>`;
+                      }
                     )
                     .join("")}
                 </div>
