@@ -2843,6 +2843,9 @@
             media.src = el.src;
           }
           lightboxContent.appendChild(media);
+          if (mediaItems.length > 1) {
+            showSwipeHint();
+          }
           lightbox.classList.add("active");
 
           const canvas = document.createElement("canvas");
