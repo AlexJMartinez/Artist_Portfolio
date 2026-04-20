@@ -1559,6 +1559,8 @@
 
         let currentIndex = 0;
         let mediaItems = [];
+        let devVideoItems = [];
+        let currentDevIndex = 0;
 
         const nav = document.querySelector("nav");
         const main = document.querySelector("main");
@@ -2070,6 +2072,7 @@
               video.play().catch(() => {});
             });
 
+            devVideoItems = [];
             mediaItems = Array.from(
               document.querySelectorAll(".gallery-item img"),
             );
@@ -2354,11 +2357,18 @@
               if (el && item.title) el.textContent = item.title;
             });
 
+            // Build ordered list of video IDs for lightbox navigation
+            mediaItems = [];
+            devVideoItems = Array.from(
+              document.querySelectorAll(".dev-link[data-video-id]")
+            ).map((l) => l.dataset.videoId);
+
             // Open YouTube lightbox on thumbnail click
-            document.querySelectorAll(".dev-link[data-video-id]").forEach((link) => {
+            document.querySelectorAll(".dev-link[data-video-id]").forEach((link, idx) => {
               link.addEventListener("click", (e) => {
                 e.stopPropagation();
-                openYoutubeLightbox(link.dataset.videoId);
+                currentDevIndex = idx;
+                openYoutubeLightbox(devVideoItems[currentDevIndex]);
               });
             });
 
@@ -2649,8 +2659,13 @@
           iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
           iframe.allowFullscreen = true;
           lightboxContent.appendChild(iframe);
-          prevBtn.style.display = "none";
-          nextBtn.style.display = "none";
+          if (devVideoItems.length > 1) {
+            prevBtn.style.display = "";
+            nextBtn.style.display = "";
+          } else {
+            prevBtn.style.display = "none";
+            nextBtn.style.display = "none";
+          }
           lightbox.classList.add("active");
         }
 
@@ -2692,14 +2707,21 @@
 
         closeBtn.addEventListener("click", closeLightbox);
         prevBtn.addEventListener("click", () => {
-          if (mediaItems.length) {
+          if (devVideoItems.length > 1) {
+            currentDevIndex =
+              (currentDevIndex - 1 + devVideoItems.length) % devVideoItems.length;
+            openYoutubeLightbox(devVideoItems[currentDevIndex]);
+          } else if (mediaItems.length) {
             currentIndex =
               (currentIndex - 1 + mediaItems.length) % mediaItems.length;
             openLightbox(mediaItems[currentIndex]);
           }
         });
         nextBtn.addEventListener("click", () => {
-          if (mediaItems.length) {
+          if (devVideoItems.length > 1) {
+            currentDevIndex = (currentDevIndex + 1) % devVideoItems.length;
+            openYoutubeLightbox(devVideoItems[currentDevIndex]);
+          } else if (mediaItems.length) {
             currentIndex = (currentIndex + 1) % mediaItems.length;
             openLightbox(mediaItems[currentIndex]);
           }
@@ -2731,18 +2753,28 @@
           // Only trigger swipe if horizontal movement is significant and vertical movement is minimal
           if (
             Math.abs(deltaX) >= swipeThreshold &&
-            deltaY <= swipeRestraint &&
-            mediaItems.length > 1
+            deltaY <= swipeRestraint
           ) {
-            if (deltaX > 0) {
-              // Swipe right - go to previous image
-              currentIndex =
-                (currentIndex - 1 + mediaItems.length) % mediaItems.length;
-              openLightbox(mediaItems[currentIndex]);
-            } else {
-              // Swipe left - go to next image
-              currentIndex = (currentIndex + 1) % mediaItems.length;
-              openLightbox(mediaItems[currentIndex]);
+            if (devVideoItems.length > 1) {
+              if (deltaX > 0) {
+                currentDevIndex =
+                  (currentDevIndex - 1 + devVideoItems.length) % devVideoItems.length;
+                openYoutubeLightbox(devVideoItems[currentDevIndex]);
+              } else {
+                currentDevIndex = (currentDevIndex + 1) % devVideoItems.length;
+                openYoutubeLightbox(devVideoItems[currentDevIndex]);
+              }
+            } else if (mediaItems.length > 1) {
+              if (deltaX > 0) {
+                // Swipe right - go to previous image
+                currentIndex =
+                  (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+                openLightbox(mediaItems[currentIndex]);
+              } else {
+                // Swipe left - go to next image
+                currentIndex = (currentIndex + 1) % mediaItems.length;
+                openLightbox(mediaItems[currentIndex]);
+              }
             }
           }
         }
@@ -2759,14 +2791,25 @@
           if (e.key === "Escape") {
             closeLightbox();
           }
-          if (e.key === "ArrowLeft" && mediaItems.length) {
-            currentIndex =
-              (currentIndex - 1 + mediaItems.length) % mediaItems.length;
-            openLightbox(mediaItems[currentIndex]);
+          if (e.key === "ArrowLeft") {
+            if (devVideoItems.length > 1) {
+              currentDevIndex =
+                (currentDevIndex - 1 + devVideoItems.length) % devVideoItems.length;
+              openYoutubeLightbox(devVideoItems[currentDevIndex]);
+            } else if (mediaItems.length) {
+              currentIndex =
+                (currentIndex - 1 + mediaItems.length) % mediaItems.length;
+              openLightbox(mediaItems[currentIndex]);
+            }
           }
-          if (e.key === "ArrowRight" && mediaItems.length) {
-            currentIndex = (currentIndex + 1) % mediaItems.length;
-            openLightbox(mediaItems[currentIndex]);
+          if (e.key === "ArrowRight") {
+            if (devVideoItems.length > 1) {
+              currentDevIndex = (currentDevIndex + 1) % devVideoItems.length;
+              openYoutubeLightbox(devVideoItems[currentDevIndex]);
+            } else if (mediaItems.length) {
+              currentIndex = (currentIndex + 1) % mediaItems.length;
+              openLightbox(mediaItems[currentIndex]);
+            }
           }
         });
 
