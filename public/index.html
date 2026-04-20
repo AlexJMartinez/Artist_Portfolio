@@ -854,6 +854,28 @@
         }
       }
 
+      /* ===== Lightbox Swipe Zones (for YouTube iframes on mobile) ===== */
+      .lightbox-swipe-zone {
+        display: none;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 18%;
+        /* Must be above the iframe (auto/0) but below controls (z-index 10001) */
+        z-index: 10000;
+        background: transparent;
+        pointer-events: none;
+      }
+      .lightbox-swipe-zone.left { left: 0; }
+      .lightbox-swipe-zone.right { right: 0; }
+      /* Only activate swipe zones on touch devices */
+      @media (hover: none) and (pointer: coarse) {
+        .lightbox.active .lightbox-swipe-zone.active {
+          display: block;
+          pointer-events: auto;
+        }
+      }
+
       /* ===== CONTACT / LOGIN ===== */
       .login-container {
         display: flex;
@@ -1464,6 +1486,8 @@
       <div class="lightbox-content"></div>
       <span class="lightbox-nav lightbox-next">&#10095;</span>
       <div class="lightbox-caption"></div>
+      <div class="lightbox-swipe-zone left"></div>
+      <div class="lightbox-swipe-zone right"></div>
     </div>
 
     <!-- Floating Mobile Navigation -->
@@ -1584,6 +1608,8 @@
         const closeBtn = lightbox.querySelector(".lightbox-close");
         const prevBtn = lightbox.querySelector(".lightbox-prev");
         const nextBtn = lightbox.querySelector(".lightbox-next");
+        const swipeZoneLeft = lightbox.querySelector(".lightbox-swipe-zone.left");
+        const swipeZoneRight = lightbox.querySelector(".lightbox-swipe-zone.right");
 
         let currentIndex = 0;
         let mediaItems = [];
@@ -2697,6 +2723,8 @@
               ? `${item.title}  •  ${counter}`
               : counter;
             lightboxCaption.style.display = "block";
+            swipeZoneLeft.classList.add("active");
+            swipeZoneRight.classList.add("active");
           } else {
             prevBtn.style.display = "none";
             nextBtn.style.display = "none";
@@ -2706,6 +2734,8 @@
             } else {
               lightboxCaption.style.display = "none";
             }
+            swipeZoneLeft.classList.remove("active");
+            swipeZoneRight.classList.remove("active");
           }
           lightbox.classList.add("active");
         }
@@ -2745,6 +2775,8 @@
           prevBtn.style.display = "";
           nextBtn.style.display = "";
           lightboxCaption.style.display = "none";
+          swipeZoneLeft.classList.remove("active");
+          swipeZoneRight.classList.remove("active");
         }
 
         closeBtn.addEventListener("click", closeLightbox);
@@ -2827,6 +2859,23 @@
         });
         lightbox.addEventListener("touchend", handleTouchEnd, {
           passive: true,
+        });
+
+        // Swipe zones sit on top of the YouTube iframe to capture touch events
+        // that the iframe would otherwise absorb, enabling swipe navigation on mobile.
+        // stopPropagation prevents the event from also firing the parent lightbox
+        // handlers, which would cause double-navigation on a single swipe.
+        function handleZoneTouchStart(e) {
+          e.stopPropagation();
+          handleTouchStart(e);
+        }
+        function handleZoneTouchEnd(e) {
+          e.stopPropagation();
+          handleTouchEnd(e);
+        }
+        [swipeZoneLeft, swipeZoneRight].forEach((zone) => {
+          zone.addEventListener("touchstart", handleZoneTouchStart, { passive: true });
+          zone.addEventListener("touchend", handleZoneTouchEnd, { passive: true });
         });
         document.addEventListener("keydown", (e) => {
           if (!lightbox.classList.contains("active")) return;
