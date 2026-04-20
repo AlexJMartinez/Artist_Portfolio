@@ -420,18 +420,29 @@
         margin: 0 auto;
         min-height: 100vh;
       }
-      .portfolio-section-heading {
-        font-size: 1rem;
-        font-weight: 600;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.45);
-        margin: 2.5rem 0 1rem;
-        padding-bottom: 0.4rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+      .portfolio-section {
+        position: relative;
+        margin-bottom: 3rem;
       }
-      .portfolio-section-heading:first-child {
-        margin-top: 0;
+      .portfolio-section + .portfolio-section {
+        margin-top: 1rem;
+      }
+      .portfolio-section-heading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.38);
+        margin: 0;
+        padding: 0;
+        line-height: 1;
+        z-index: 2;
+      }
+      .portfolio-section .gallery {
+        padding-top: 1.4rem;
       }
       .gallery {
         column-count: 3;
@@ -2165,13 +2176,17 @@
 
             content.innerHTML = `
               <section class="portfolio-wrapper">
-                <h2 class="portfolio-section-heading">Photography</h2>
-                <div class="gallery" id="gallery-photography">
-                  ${photoItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No photos yet.</p>`}
+                <div class="portfolio-section">
+                  <h2 class="portfolio-section-heading">Photography</h2>
+                  <div class="gallery" id="gallery-photography">
+                    ${photoItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No photos yet.</p>`}
+                  </div>
                 </div>
-                <h2 class="portfolio-section-heading">Audio Visual</h2>
-                <div class="gallery" id="gallery-av">
-                  ${avItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No audio visual work yet.</p>`}
+                <div class="portfolio-section">
+                  <h2 class="portfolio-section-heading">Audio Visual</h2>
+                  <div class="gallery" id="gallery-av">
+                    ${avItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No audio visual work yet.</p>`}
+                  </div>
                 </div>
                 ${token ? `
                   <div class="upload">
