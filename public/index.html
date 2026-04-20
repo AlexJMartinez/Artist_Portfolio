@@ -2769,6 +2769,7 @@
 
         /* ===== Swipe Hint Helpers ===== */
         function showSwipeHint() {
+          if (!navigator.maxTouchPoints && !window.matchMedia("(pointer: coarse)").matches) return;
           if (swipeHintShown) return;
           swipeHintShown = true;
           clearTimeout(swipeHintTimer);
