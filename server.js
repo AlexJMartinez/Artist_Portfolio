@@ -163,7 +163,7 @@ app.use('/uploads', (req, res, next) => {
 
 // Disable caching for the main HTML and API responses to prevent replit iframe caching issues
 app.use((req, res, next) => {
-  if (req.path === '/' || req.path.endsWith('.html') || req.path.startsWith('/api') || req.path === '/portfolio-images' || req.path === '/about' || req.path === '/about-data') {
+  if (req.path === '/' || req.path.endsWith('.html') || req.path.startsWith('/api') || req.path === '/portfolio-images' || req.path === '/about' || req.path === '/about-data' || req.path === '/development-videos') {
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
@@ -660,6 +660,77 @@ app.delete("/portfolio/:id", auth, (req, res) => {
   } catch (error) {
     console.error("Portfolio delete error:", error);
     res.status(500).json({ error: "Failed to delete portfolio item" });
+  }
+});
+
+// ---- DEVELOPMENT VIDEOS (YouTube links) ---- //
+const developmentFile = path.join(__dirname, "uploads", "development.json");
+
+function extractYouTubeId(url) {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+}
+
+app.get("/development-videos", (req, res) => {
+  try {
+    if (fs.existsSync(developmentFile)) {
+      const data = fs.readFileSync(developmentFile, "utf8");
+      return res.json(JSON.parse(data));
+    }
+    res.json([]);
+  } catch (err) {
+    console.error("Development videos error:", err);
+    res.status(500).json({ error: "Failed to load development videos" });
+  }
+});
+
+app.post("/development-videos", auth, (req, res) => {
+  try {
+    const { youtubeUrl, title } = req.body;
+    if (!youtubeUrl) {
+      return res.status(400).json({ error: "youtubeUrl is required" });
+    }
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) {
+      return res.status(400).json({ error: "Invalid YouTube URL" });
+    }
+
+    let items = [];
+    if (fs.existsSync(developmentFile)) {
+      items = JSON.parse(fs.readFileSync(developmentFile, "utf8"));
+    }
+
+    const newItem = {
+      id: Date.now(),
+      videoId,
+      youtubeUrl: `https://www.youtube.com/watch?v=${videoId}`,
+      title: (title || "").trim(),
+      addedAt: new Date().toISOString(),
+    };
+
+    items.push(newItem);
+    fs.writeFileSync(developmentFile, JSON.stringify(items, null, 2));
+    res.json({ success: true, item: newItem });
+  } catch (err) {
+    console.error("Development video add error:", err);
+    res.status(500).json({ error: "Failed to add development video" });
+  }
+});
+
+app.delete("/development-videos/:id", auth, (req, res) => {
+  try {
+    if (!fs.existsSync(developmentFile)) {
+      return res.json({ success: true });
+    }
+    let items = JSON.parse(fs.readFileSync(developmentFile, "utf8"));
+    items = items.filter((item) => item.id != req.params.id);
+    fs.writeFileSync(developmentFile, JSON.stringify(items, null, 2));
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Development video delete error:", err);
+    res.status(500).json({ error: "Failed to delete development video" });
   }
 });
 

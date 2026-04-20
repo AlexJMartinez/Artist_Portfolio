@@ -519,6 +519,41 @@
         }
       }
 
+      /* ===== DEVELOPMENT PAGE ===== */
+      .dev-title {
+        font-size: 0.82rem;
+        color: #444;
+        margin-top: 0.4rem;
+        text-align: center;
+        line-height: 1.3;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .dev-add-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-width: 500px;
+        margin: 2rem auto 0;
+      }
+      .dev-add-form input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .dev-add-form button {
+        align-self: flex-start;
+      }
+      .gallery-item.dev-item img {
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        display: block;
+        width: 100%;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
       /* Trash button */
       .delete-btn {
         position: absolute;
@@ -1362,7 +1397,7 @@
         <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
         <li><a onclick="loadPage('about')">About</a></li>
         <li><a onclick="loadPage('tools')">Tools + Tech</a></li>
-        <!-- NEW -->
+        <li><a onclick="loadPage('development')">Development</a></li>
         <li><a onclick="loadPage('contact')">Contact</a></li>
         <li>
           <a id="loginBtn" onclick="loadPage('login')">Login</a>
@@ -1418,6 +1453,14 @@
         <div class="floating-nav-overflow floating-nav-item">
           <i class="fas fa-ellipsis-h fa-fw"></i>
           <div class="floating-nav-overflow-menu">
+            <a
+              class="floating-nav-overflow-item"
+              onclick="loadPage('development')"
+              data-page="development"
+            >
+              <i class="fas fa-code"></i>
+              <span>Development</span>
+            </a>
             <a
               class="floating-nav-overflow-item"
               onclick="loadPage('contact')"
@@ -2225,6 +2268,142 @@
             });
           }
 
+          if (page === "development") {
+            content.innerHTML = `
+              <section class="portfolio-wrapper dev-wrapper">
+                <div class="skeleton-gallery">
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                  <div class="skeleton-item"></div>
+                </div>
+              </section>`;
+
+            const devRes = await fetch("/development-videos");
+            const devItems = await devRes.json();
+
+            content.innerHTML = `
+              <section class="portfolio-wrapper dev-wrapper">
+                <div class="gallery">
+                  ${devItems.length === 0 ? `<p style="text-align:center;color:#888;grid-column:1/-1;padding:3rem 0;">No videos yet.</p>` : ""}
+                  ${devItems
+                    .map(
+                      (item) => `
+                  <div class="gallery-item dev-item ${token ? "admin" : ""}" data-id="${item.id}">
+                    <img
+                      src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
+                      alt="${item.title || "Development video"}"
+                      loading="lazy"
+                    >
+                    ${item.title ? `<div class="dev-title"></div>` : ""}
+                    ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
+                  </div>`
+                    )
+                    .join("")}
+                </div>
+                ${
+                  token
+                    ? `<div class="upload">
+                    <h3>Add YouTube Video</h3>
+                    <div class="dev-add-form">
+                      <input type="url" id="devYoutubeUrl" placeholder="YouTube URL (e.g. https://youtu.be/...)" />
+                      <input type="text" id="devTitle" placeholder="Title (optional)" />
+                      <button id="devAddBtn">Add Video</button>
+                    </div>
+                  </div>`
+                    : ""
+                }
+              </section>`;
+            closeMenuOnLinkClick();
+
+            // Safely set title text to prevent XSS
+            devItems.forEach((item) => {
+              const el = document.querySelector(`[data-id="${item.id}"] .dev-title`);
+              if (el && item.title) el.textContent = item.title;
+            });
+
+            // Click thumbnail → open YouTube
+            document.querySelectorAll(".gallery-item.dev-item img").forEach((img) => {
+              img.addEventListener("click", () => {
+                const id = img.closest(".gallery-item").dataset.id;
+                const found = devItems.find((i) => i.id == id);
+                if (found) window.open(found.youtubeUrl, "_blank", "noopener");
+              });
+            });
+
+            if (token) {
+              // Delete buttons
+              document.querySelectorAll(".gallery-item.dev-item .delete-btn").forEach((btn) => {
+                btn.addEventListener("click", async (e) => {
+                  e.stopPropagation();
+                  const id = btn.closest(".gallery-item").dataset.id;
+                  try {
+                    const r = await fetch("/development-videos/" + id, {
+                      method: "DELETE",
+                      headers: { Authorization: "Bearer " + token },
+                    });
+                    if (r.ok) {
+                      loadPage("development");
+                    } else {
+                      const err = await r.json();
+                      alert("❌ Delete failed: " + (err.error || "Unknown error"));
+                      if (r.status === 401) { localStorage.removeItem("adminToken"); token = null; loadPage("login"); }
+                    }
+                  } catch (err) {
+                    alert("❌ Delete failed. Please try again.");
+                  }
+                });
+              });
+
+              // Adaptive icon colour on thumbnails
+              document.querySelectorAll(".gallery-item.dev-item.admin").forEach((item) => {
+                const btn = item.querySelector(".delete-btn");
+                const img = item.querySelector("img");
+                if (btn && img) {
+                  const canvas = document.createElement("canvas");
+                  const ctx = canvas.getContext("2d");
+                  const runCheck = () => setAdaptiveIconColor(img, btn, canvas, ctx);
+                  img.addEventListener("load", runCheck);
+                  if (img.complete) runCheck();
+                }
+              });
+
+              // Add video form
+              document.getElementById("devAddBtn")?.addEventListener("click", async () => {
+                const urlInput = document.getElementById("devYoutubeUrl");
+                const titleInput = document.getElementById("devTitle");
+                const youtubeUrl = urlInput.value.trim();
+                const title = titleInput.value.trim();
+                if (!youtubeUrl) { alert("Please enter a YouTube URL."); return; }
+                try {
+                  const r = await fetch("/development-videos", {
+                    method: "POST",
+                    headers: {
+                      Authorization: "Bearer " + token,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ youtubeUrl, title }),
+                  });
+                  const result = await r.json();
+                  if (r.ok) {
+                    loadPage("development");
+                  } else {
+                    alert("❌ " + (result.error || "Failed to add video"));
+                    if (r.status === 401) { localStorage.removeItem("adminToken"); token = null; loadPage("login"); }
+                  }
+                } catch (err) {
+                  alert("❌ Failed to add video. Please try again.");
+                }
+              });
+            }
+
+            document.querySelectorAll(".gallery-item.dev-item").forEach((item, i) => {
+              item.style.animationDelay = `${i * 0.1}s`;
+            });
+          }
+
           if (page === "contact") {
             content.innerHTML = `
               <div class="login-container">
@@ -2355,6 +2534,7 @@
           const content = document.getElementById("content");
           if (content.querySelector(".hero")) return "home";
           if (content.querySelector(".about")) return "about";
+          if (content.querySelector(".dev-wrapper")) return "development";
           if (content.querySelector(".portfolio-wrapper")) return "portfolio";
           if (content.querySelector(".tools")) return "tools";
           if (content.querySelector(".contact-card")) return "contact";
