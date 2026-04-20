@@ -545,13 +545,17 @@
       .dev-add-form button {
         align-self: flex-start;
       }
+      .gallery-item.dev-item .dev-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
       .gallery-item.dev-item img {
         aspect-ratio: 16 / 9;
         object-fit: cover;
         display: block;
         width: 100%;
         border-radius: 6px;
-        cursor: pointer;
       }
 
       /* Trash button */
@@ -2292,12 +2296,14 @@
                     .map(
                       (item) => `
                   <div class="gallery-item dev-item ${token ? "admin" : ""}" data-id="${item.id}">
-                    <img
-                      src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
-                      alt="${item.title || "Development video"}"
-                      loading="lazy"
-                    >
-                    ${item.title ? `<div class="dev-title"></div>` : ""}
+                    <a class="dev-link" href="${item.youtubeUrl}" target="_blank" rel="noopener noreferrer">
+                      <img
+                        src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
+                        alt="${item.title || "Development video"}"
+                        loading="lazy"
+                      >
+                      ${item.title ? `<div class="dev-title"></div>` : ""}
+                    </a>
                     ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
                   </div>`
                     )
@@ -2322,15 +2328,6 @@
             devItems.forEach((item) => {
               const el = document.querySelector(`[data-id="${item.id}"] .dev-title`);
               if (el && item.title) el.textContent = item.title;
-            });
-
-            // Click thumbnail → open YouTube
-            document.querySelectorAll(".gallery-item.dev-item img").forEach((img) => {
-              img.addEventListener("click", () => {
-                const id = img.closest(".gallery-item").dataset.id;
-                const found = devItems.find((i) => i.id == id);
-                if (found) window.open(found.youtubeUrl, "_blank", "noopener");
-              });
             });
 
             if (token) {
