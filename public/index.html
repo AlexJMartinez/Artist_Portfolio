@@ -451,6 +451,14 @@
       .dev-add-form button {
         align-self: flex-start;
       }
+      .gallery-item.dev-item {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+      .gallery-item.dev-item:hover {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
       .gallery-item.dev-item .dev-link {
         display: block;
         text-decoration: none;
@@ -958,7 +966,7 @@
         max-width: 350px;
       }
       .contact-card {
-        max-width: 600px;
+        max-width: 400px;
       }
       @media (max-width: 600px) {
         .login-card,
@@ -1686,7 +1694,8 @@
           });
         }
         function shuffleGallery() {
-          document.querySelectorAll(".portfolio-wrapper .gallery").forEach(shuffleOneGallery);
+          const photoGallery = document.getElementById("gallery-photography");
+          if (photoGallery) shuffleOneGallery(photoGallery);
         }
 
         /* ===== Router ===== */
