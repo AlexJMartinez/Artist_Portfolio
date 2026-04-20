@@ -768,6 +768,23 @@
       .lightbox video {
         background: #000;
       }
+      .lightbox-content iframe {
+        width: 80vw;
+        height: 45vw;
+        max-width: 960px;
+        max-height: 540px;
+        min-height: 200px;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        display: block;
+      }
+      @media (max-width: 600px) {
+        .lightbox-content iframe {
+          width: 95vw;
+          height: 53.4vw;
+        }
+      }
       .lightbox-close {
         position: fixed;
         top: 20px;
@@ -2302,14 +2319,14 @@
                           .replace(/>/g, "&gt;");
                         return `
                   <div class="gallery-item dev-item ${token ? "admin" : ""}" data-id="${item.id}">
-                    <a class="dev-link" href="${item.youtubeUrl}" target="_blank" rel="noopener noreferrer">
+                    <div class="dev-link" data-video-id="${item.videoId}" style="cursor:pointer;">
                       <img
                         src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
                         alt="${safeAlt}"
                         loading="lazy"
                       >
                       ${item.title ? `<div class="dev-title"></div>` : ""}
-                    </a>
+                    </div>
                     ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
                   </div>`;
                       }
@@ -2335,6 +2352,14 @@
             devItems.forEach((item) => {
               const el = document.querySelector(`[data-id="${item.id}"] .dev-title`);
               if (el && item.title) el.textContent = item.title;
+            });
+
+            // Open YouTube lightbox on thumbnail click
+            document.querySelectorAll(".dev-link[data-video-id]").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                e.stopPropagation();
+                openYoutubeLightbox(link.dataset.videoId);
+              });
             });
 
             if (token) {
@@ -2617,6 +2642,18 @@
         }
 
         /* ===== Lightbox ===== */
+        function openYoutubeLightbox(videoId) {
+          lightboxContent.innerHTML = "";
+          const iframe = document.createElement("iframe");
+          iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          lightboxContent.appendChild(iframe);
+          prevBtn.style.display = "none";
+          nextBtn.style.display = "none";
+          lightbox.classList.add("active");
+        }
+
         function openLightbox(el) {
           lightboxContent.innerHTML = "";
           let media;
@@ -2646,10 +2683,14 @@
           }
         }
 
-        closeBtn.addEventListener("click", () => {
+        function closeLightbox() {
           lightbox.classList.remove("active");
           lightboxContent.innerHTML = "";
-        });
+          prevBtn.style.display = "";
+          nextBtn.style.display = "";
+        }
+
+        closeBtn.addEventListener("click", closeLightbox);
         prevBtn.addEventListener("click", () => {
           if (mediaItems.length) {
             currentIndex =
@@ -2716,15 +2757,14 @@
         document.addEventListener("keydown", (e) => {
           if (!lightbox.classList.contains("active")) return;
           if (e.key === "Escape") {
-            lightbox.classList.remove("active");
-            lightboxContent.innerHTML = "";
+            closeLightbox();
           }
-          if (e.key === "ArrowLeft") {
+          if (e.key === "ArrowLeft" && mediaItems.length) {
             currentIndex =
               (currentIndex - 1 + mediaItems.length) % mediaItems.length;
             openLightbox(mediaItems[currentIndex]);
           }
-          if (e.key === "ArrowRight") {
+          if (e.key === "ArrowRight" && mediaItems.length) {
             currentIndex = (currentIndex + 1) % mediaItems.length;
             openLightbox(mediaItems[currentIndex]);
           }
