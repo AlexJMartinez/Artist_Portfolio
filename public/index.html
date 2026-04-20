@@ -672,6 +672,28 @@
         display: block;
       }
 
+      /* Move-category button */
+      .move-category-btn {
+        position: absolute;
+        bottom: 85px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        padding: 6px 8px;
+        font-size: 0.7rem;
+        cursor: pointer;
+        z-index: 3;
+        display: none;
+        white-space: nowrap;
+        text-align: center;
+      }
+      .gallery-item.admin .move-category-btn {
+        display: block;
+      }
+
       /* Mobile specific adjustments */
       @media (max-width: 700px) {
         .caption-edit {
@@ -684,6 +706,12 @@
 
         .gallery-item.admin.editing-caption .caption-edit {
           display: block;
+        }
+        .gallery-item.admin .move-category-btn {
+          position: static;
+          width: 100%;
+          transform: none;
+          margin-top: 6px;
         }
       }
 
@@ -2101,8 +2129,12 @@
             function buildGalleryItem(item) {
               const ext = item.url.split(".").pop().toLowerCase();
               const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
+              const itemCategory = item.category || "photography";
+              const moveLabel = itemCategory === "audio-visual"
+                ? "→ Photography"
+                : "→ Audio Visual";
               return `
-                <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
+                <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}" data-category="${itemCategory}">
                   ${
                     isVideo
                       ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"><i class="fas fa-play-circle play-icon"></i></div>`
@@ -2113,6 +2145,7 @@
                     token
                       ? `
                     <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    <button class="move-category-btn">${moveLabel}</button>
                     <button class="caption-edit-btn">Edit Caption</button>
                     <div class="caption-edit">
                       <textarea placeholder="Add a caption..." maxlength="500"></textarea>
@@ -2325,6 +2358,52 @@
                     } catch (error) {
                       console.error("Delete error:", error);
                       alert("❌ Delete failed. Please try again.");
+                    }
+                  });
+                });
+
+              // Move between Photography / Audio Visual
+              document
+                .querySelectorAll(".gallery-item .move-category-btn")
+                .forEach((btn) => {
+                  btn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    const item = btn.closest(".gallery-item");
+                    const id = item.dataset.id;
+                    const currentCategory = item.dataset.category;
+                    const newCategory =
+                      currentCategory === "audio-visual"
+                        ? "photography"
+                        : "audio-visual";
+                    try {
+                      const response = await fetch(
+                        `/portfolio/${id}/category`,
+                        {
+                          method: "PATCH",
+                          headers: {
+                            Authorization: "Bearer " + token,
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({ category: newCategory }),
+                        },
+                      );
+                      const result = await response.json();
+                      if (result.success) {
+                        loadPage("portfolio");
+                      } else {
+                        alert(
+                          "❌ Move failed: " +
+                            (result.error || "Unknown error"),
+                        );
+                        if (response.status === 401) {
+                          localStorage.removeItem("adminToken");
+                          token = null;
+                          loadPage("login");
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Move error:", error);
+                      alert("❌ Move failed. Please try again.");
                     }
                   });
                 });

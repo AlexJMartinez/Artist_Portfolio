@@ -637,6 +637,35 @@ app.patch(
   },
 );
 
+// Update portfolio item category
+app.patch("/portfolio/:id/category", auth, (req, res) => {
+  try {
+    const rawCategory = req.body.category || "";
+    const category = ["photography", "audio-visual"].includes(rawCategory)
+      ? rawCategory
+      : null;
+    if (!category) {
+      return res.status(400).json({ error: "Invalid category" });
+    }
+    if (!fs.existsSync(portfolioFile)) {
+      return res.status(404).json({ error: "Portfolio file not found" });
+    }
+    const portfolio = JSON.parse(fs.readFileSync(portfolioFile, "utf8"));
+    const itemIndex = portfolio.findIndex(
+      (item) => item.id === parseInt(req.params.id),
+    );
+    if (itemIndex === -1) {
+      return res.status(404).json({ error: "Portfolio item not found" });
+    }
+    portfolio[itemIndex].category = category;
+    fs.writeFileSync(portfolioFile, JSON.stringify(portfolio, null, 2));
+    res.json({ success: true, category });
+  } catch (error) {
+    console.error("Category update error:", error);
+    res.status(500).json({ error: "Failed to update category" });
+  }
+});
+
 app.delete("/portfolio/:id", auth, (req, res) => {
   try {
     if (!fs.existsSync(portfolioFile)) {
