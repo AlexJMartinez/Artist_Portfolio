@@ -816,6 +816,27 @@
       .lightbox-nav:hover {
         background: rgba(0, 0, 0, 0.6);
       }
+      .lightbox-caption {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 500;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.45);
+        padding: 0.4rem 1.2rem;
+        border-radius: 20px;
+        max-width: 80vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        z-index: 10001;
+        pointer-events: none;
+        display: none;
+      }
       @media (max-width: 600px) {
         .lightbox-close {
           font-size: 2rem;
@@ -825,6 +846,11 @@
         .lightbox-nav {
           font-size: 2rem;
           padding: 0.25rem 0.5rem;
+        }
+        .lightbox-caption {
+          font-size: 0.875rem;
+          bottom: 16px;
+          padding: 0.3rem 0.9rem;
         }
       }
 
@@ -1437,6 +1463,7 @@
       <span class="lightbox-nav lightbox-prev">&#10094;</span>
       <div class="lightbox-content"></div>
       <span class="lightbox-nav lightbox-next">&#10095;</span>
+      <div class="lightbox-caption"></div>
     </div>
 
     <!-- Floating Mobile Navigation -->
@@ -1553,6 +1580,7 @@
         const content = document.getElementById("content");
         const lightbox = document.getElementById("lightbox");
         const lightboxContent = lightbox.querySelector(".lightbox-content");
+        const lightboxCaption = lightbox.querySelector(".lightbox-caption");
         const closeBtn = lightbox.querySelector(".lightbox-close");
         const prevBtn = lightbox.querySelector(".lightbox-prev");
         const nextBtn = lightbox.querySelector(".lightbox-next");
@@ -2322,7 +2350,7 @@
                           .replace(/>/g, "&gt;");
                         return `
                   <div class="gallery-item dev-item ${token ? "admin" : ""}" data-id="${item.id}">
-                    <div class="dev-link" data-video-id="${item.videoId}" style="cursor:pointer;">
+                    <div class="dev-link" data-video-id="${item.videoId}" data-title="${item.title ? safeAlt : ''}" style="cursor:pointer;">
                       <img
                         src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
                         alt="${safeAlt}"
@@ -2357,18 +2385,18 @@
               if (el && item.title) el.textContent = item.title;
             });
 
-            // Build ordered list of video IDs for lightbox navigation
+            // Build ordered list of video objects for lightbox navigation
             mediaItems = [];
             devVideoItems = Array.from(
               document.querySelectorAll(".dev-link[data-video-id]")
-            ).map((l) => l.dataset.videoId);
+            ).map((l) => ({ videoId: l.dataset.videoId, title: l.dataset.title || "" }));
 
             // Open YouTube lightbox on thumbnail click
             document.querySelectorAll(".dev-link[data-video-id]").forEach((link, idx) => {
               link.addEventListener("click", (e) => {
                 e.stopPropagation();
                 currentDevIndex = idx;
-                openYoutubeLightbox(devVideoItems[currentDevIndex]);
+                openYoutubeLightbox();
               });
             });
 
@@ -2652,7 +2680,9 @@
         }
 
         /* ===== Lightbox ===== */
-        function openYoutubeLightbox(videoId) {
+        function openYoutubeLightbox() {
+          const item = devVideoItems[currentDevIndex];
+          const videoId = item.videoId;
           lightboxContent.innerHTML = "";
           const iframe = document.createElement("iframe");
           iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
@@ -2662,9 +2692,20 @@
           if (devVideoItems.length > 1) {
             prevBtn.style.display = "";
             nextBtn.style.display = "";
+            const counter = `${currentDevIndex + 1} / ${devVideoItems.length}`;
+            lightboxCaption.textContent = item.title
+              ? `${item.title}  •  ${counter}`
+              : counter;
+            lightboxCaption.style.display = "block";
           } else {
             prevBtn.style.display = "none";
             nextBtn.style.display = "none";
+            if (item.title) {
+              lightboxCaption.textContent = item.title;
+              lightboxCaption.style.display = "block";
+            } else {
+              lightboxCaption.style.display = "none";
+            }
           }
           lightbox.classList.add("active");
         }
@@ -2703,6 +2744,7 @@
           lightboxContent.innerHTML = "";
           prevBtn.style.display = "";
           nextBtn.style.display = "";
+          lightboxCaption.style.display = "none";
         }
 
         closeBtn.addEventListener("click", closeLightbox);
@@ -2710,7 +2752,7 @@
           if (devVideoItems.length > 1) {
             currentDevIndex =
               (currentDevIndex - 1 + devVideoItems.length) % devVideoItems.length;
-            openYoutubeLightbox(devVideoItems[currentDevIndex]);
+            openYoutubeLightbox();
           } else if (mediaItems.length) {
             currentIndex =
               (currentIndex - 1 + mediaItems.length) % mediaItems.length;
@@ -2720,7 +2762,7 @@
         nextBtn.addEventListener("click", () => {
           if (devVideoItems.length > 1) {
             currentDevIndex = (currentDevIndex + 1) % devVideoItems.length;
-            openYoutubeLightbox(devVideoItems[currentDevIndex]);
+            openYoutubeLightbox();
           } else if (mediaItems.length) {
             currentIndex = (currentIndex + 1) % mediaItems.length;
             openLightbox(mediaItems[currentIndex]);
@@ -2759,10 +2801,10 @@
               if (deltaX > 0) {
                 currentDevIndex =
                   (currentDevIndex - 1 + devVideoItems.length) % devVideoItems.length;
-                openYoutubeLightbox(devVideoItems[currentDevIndex]);
+                openYoutubeLightbox();
               } else {
                 currentDevIndex = (currentDevIndex + 1) % devVideoItems.length;
-                openYoutubeLightbox(devVideoItems[currentDevIndex]);
+                openYoutubeLightbox();
               }
             } else if (mediaItems.length > 1) {
               if (deltaX > 0) {
@@ -2795,7 +2837,7 @@
             if (devVideoItems.length > 1) {
               currentDevIndex =
                 (currentDevIndex - 1 + devVideoItems.length) % devVideoItems.length;
-              openYoutubeLightbox(devVideoItems[currentDevIndex]);
+              openYoutubeLightbox();
             } else if (mediaItems.length) {
               currentIndex =
                 (currentIndex - 1 + mediaItems.length) % mediaItems.length;
@@ -2805,7 +2847,7 @@
           if (e.key === "ArrowRight") {
             if (devVideoItems.length > 1) {
               currentDevIndex = (currentDevIndex + 1) % devVideoItems.length;
-              openYoutubeLightbox(devVideoItems[currentDevIndex]);
+              openYoutubeLightbox();
             } else if (mediaItems.length) {
               currentIndex = (currentIndex + 1) % mediaItems.length;
               openLightbox(mediaItems[currentIndex]);
