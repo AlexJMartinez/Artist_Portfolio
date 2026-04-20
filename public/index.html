@@ -1676,7 +1676,7 @@
         let devVideoItems = [];
         let currentDevIndex = 0;
         let swipeHintTimer = null;
-        let swipeHintShown = false;
+        let swipeHintShown = localStorage.getItem("swipeHintShown") === "true";
 
         const nav = document.querySelector("nav");
         const main = document.querySelector("main");
@@ -2772,6 +2772,7 @@
           if (!navigator.maxTouchPoints && !window.matchMedia("(pointer: coarse)").matches) return;
           if (swipeHintShown) return;
           swipeHintShown = true;
+          localStorage.setItem("swipeHintShown", "true");
           clearTimeout(swipeHintTimer);
           swipeHint.classList.add("active");
           requestAnimationFrame(() => {
@@ -2871,7 +2872,6 @@
           swipeZoneRight.classList.remove("active");
           swipeHint.classList.remove("visible", "active");
           clearTimeout(swipeHintTimer);
-          swipeHintShown = false;
         }
 
         closeBtn.addEventListener("click", closeLightbox);
