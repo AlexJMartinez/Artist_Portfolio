@@ -40,3 +40,7 @@ channel = "stable-23_05"
 deploymentTarget = "cloudrun"
 run = ["node", "server.js"]
 build = ["npm", "install"]
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 60000
