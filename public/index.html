@@ -402,18 +402,6 @@
         cursor: pointer;
         /* aspect-ratio applied per-item via inline style */
       }
-      .video-placeholder .play-icon {
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 2.8rem;
-        pointer-events: none;
-        transition: color 0.2s, transform 0.2s;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-      }
-      .video-placeholder:hover .play-icon {
-        color: #fff;
-        transform: scale(1.12);
-      }
-
       /* ===== PORTFOLIO ===== */
       .portfolio-wrapper {
         max-width: 1000px;
@@ -2139,7 +2127,7 @@
                 <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}" data-category="${itemCategory}">
                   ${
                     isVideo
-                      ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"><i class="fas fa-play-circle play-icon"></i></div>`
+                      ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"></div>`
                       : `<img data-src="${item.url}" alt="Artwork" decoding="async">`
                   }
                   ${item.caption ? `<div class="caption"></div>` : ""}
