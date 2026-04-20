@@ -9,7 +9,7 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Frontend Architecture
-- **Single Page Application (SPA)**: Built with vanilla JavaScript and HTML, using client-side routing to navigate between Home, About, Portfolio, Tools + Tech, Development, Contact, and Login sections
+- **Single Page Application (SPA)**: Built with vanilla JavaScript and HTML, using client-side routing to navigate between Home, About, Portfolio, Development, Contact, and Login sections
 - **Styling Framework**: PicoCSS for clean, minimal design with custom CSS animations
 - **Interactive Elements**: Font Awesome icons for UI elements
 - **Authentication State**: Client-side token management for admin login sessions

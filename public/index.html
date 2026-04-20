@@ -118,103 +118,7 @@
         transform: translateY(-8px) rotate(-45deg);
       }
 
-      /* Tools page layout */
-      .tools {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 0 1rem;
-      }
 
-      /* shared width for both grids + their labels */
-      .tools-wrap {
-        width: min(920px, 100%);
-        margin-inline: auto;
-      }
-
-      /* section labels aligned to the left edge of the grid */
-      .tools-label {
-        margin: 2rem 0 0.75rem;
-        text-align: left;
-        font-weight: 600;
-      }
-      .tools-label:first-of-type {
-        margin-top: 0.5rem;
-      } /* space beneath main H2 */
-
-      /* chip-style labels */
-      .chip-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 25px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #333;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        transition: all 0.2s ease;
-      }
-
-      .chip-label i {
-        font-size: 0.85rem;
-        opacity: 0.8;
-      }
-
-      .chip-label:hover {
-        background: rgba(0, 0, 0, 0.08);
-        transform: translateY(-1px);
-      }
-
-      /* your existing grid, but it now fills the tools-wrap width */
-      .tools-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 16px;
-        width: 100%;
-        margin-top: 0; /* spacing handled by the labels above */
-      }
-
-      /* each item is an anchor that is a perfect square */
-      .tool {
-        position: relative;
-        display: block;
-        aspect-ratio: 1 / 1; /* perfect square */
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-        overflow: hidden;
-        text-decoration: none; /* no underline */
-        transition:
-          transform 0.18s ease,
-          box-shadow 0.18s ease;
-      }
-
-      .tool:hover {
-        transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
-      }
-
-      /* focus for keyboard users */
-      .tool:focus-visible {
-        outline: 3px solid #e63946;
-        outline-offset: 3px;
-        border-radius: 14px;
-      }
-
-      /* center the img and keep it contained */
-      .tool img {
-        position: absolute;
-        inset: 0;
-        width: 70%;
-        height: 70%;
-        margin: auto;
-        object-fit: contain; /* keep logos clean */
-        pointer-events: none;
-      }
 
       /* Mobile dropdown */
       @media (max-width: 700px) {
@@ -340,7 +244,6 @@
         max-width: 700px;
       }
       .about h2, .about h3,
-      .tools h2, .tools h3,
       .contact-card h2 {
         color: #111;
       }
@@ -1550,7 +1453,6 @@
         <li><a onclick="loadPage('home')">Home</a></li>
         <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
         <li><a onclick="loadPage('about')">About</a></li>
-        <li><a onclick="loadPage('tools')">Tools + Tech</a></li>
         <li><a onclick="loadPage('development')">Development</a></li>
         <li><a onclick="loadPage('contact')">Contact</a></li>
         <li>
@@ -1604,13 +1506,6 @@
           data-page="about"
         >
           <i class="fas fa-user fa-fw"></i>
-        </a>
-        <a
-          class="floating-nav-item"
-          onclick="loadPage('tools')"
-          data-page="tools"
-        >
-          <i class="fa-solid fa-microchip fa-fw"></i>
         </a>
         <div class="floating-nav-overflow floating-nav-item">
           <i class="fas fa-ellipsis-h fa-fw"></i>
@@ -1958,145 +1853,6 @@
                   loadPage("about");
                 });
             }
-          }
-
-          if (page === "tools") {
-            content.innerHTML = `
-              <section class="tools">
-                <h2>Tools + Tech</h2>
-                <div class="tools-wrap">
-                <!-- GRID 1 -->
-                <h3 class="tools-label chip-label"><i class="fas fa-palette"></i> Studio</h3>
-                <div class="tools-grid">
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Ableton.png" alt="HTML" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Adobe.jpeg" alt="CSS" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Avid.jpg" alt="JavaScript" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Blender.png" alt="GSAP" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Chat.png" alt="PixiJS" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Cycling.png" alt="Pico.css" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Davinci.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Javascript.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Logic.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Mediapipe.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/P5.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Python.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Touch_OSC.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/TouchDesigner.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Hex.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Gimp.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Inkscape.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/VS_code.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Figma.jpeg" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Runway.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <a class="tool" href="" target="_blank" rel="noopener">
-                    <img src="/logos/Midjourney.png" alt="Font Awesome" loading="lazy">
-                  </a>
-                  <!-- Add more tiles by repeating the <a class="tool"> … </a> block -->
-                </div>
-                <!-- GRID 2 -->
-                  <h3 class="tools-label chip-label"><i class="fas fa-briefcase"></i> Ops</h3>
-                  <div class="tools-grid">
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Slack.png" alt="Slack" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Jira.jpeg" alt="Jira" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Confluence.jpeg" alt="Confluence" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Asana.png" alt="Asana" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Notion.png" alt="Notion" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Monday.jpeg" alt="Google Workspace" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Office.png" alt="Microsoft 365" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Smartsheet.png" alt="Salesforce" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Freshdesk.png" alt="Salesforce" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos/Github.png" alt="Font Awesome" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Zapier.png" alt="Font Awesome" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/n8n.png" alt="Font Awesome" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Make.png" alt="Font Awesome" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_corp/Google.png" alt="Font Awesome" loading="lazy">
-                    </a>
-                    <!-- add more corporate apps as needed -->
-                  </div>
-                <!-- GRID 3 -->
-                  <h3 class="tools-label chip-label"><i class="fas fa-wrench"></i> Hardware</h3>
-                  <div class="tools-grid">
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_hardware/Arduino.png" alt="Google Cloud" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_hardware/M5.png" alt="GitHub" loading="lazy">
-                    </a>
-                    <a class="tool" href="" target="_blank" rel="noopener">
-                      <img src="/logos_hardware/Rasberry.png" alt="TouchDesigner" loading="lazy">
-                    </a>
-                    <!-- Add more hardware tiles by repeating the <a class="tool"> … </a> block -->
-                  </div>
-                </div>
-              </section>`;
-            closeMenuOnLinkClick();
           }
 
           if (page === "portfolio") {
@@ -2798,7 +2554,6 @@
           if (content.querySelector(".about")) return "about";
           if (content.querySelector(".dev-wrapper")) return "development";
           if (content.querySelector(".portfolio-wrapper")) return "portfolio";
-          if (content.querySelector(".tools")) return "tools";
           if (content.querySelector(".contact-card")) return "contact";
           if (content.querySelector(".login-card")) return "login";
           return "home"; // fallback
