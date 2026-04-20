@@ -420,6 +420,19 @@
         margin: 0 auto;
         min-height: 100vh;
       }
+      .portfolio-section-heading {
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.45);
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .portfolio-section-heading:first-child {
+        margin-top: 0;
+      }
       .gallery {
         column-count: 3;
         column-gap: 2rem;
@@ -1738,10 +1751,9 @@
 
         /* ===== Portfolio shuffle (desktop only) ===== */
         let shuffleInterval;
-        function shuffleGallery() {
-          const gallery = document.querySelector(".gallery");
-          if (!gallery) return;
-          const items = Array.from(gallery.children);
+        function shuffleOneGallery(gallery) {
+          const items = Array.from(gallery.querySelectorAll(".gallery-item"));
+          if (items.length < 2) return;
           const firstRects = items.map((el) => el.getBoundingClientRect());
           for (let i = items.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -1759,6 +1771,9 @@
               el.style.transition = "transform 0.8s ease";
             });
           });
+        }
+        function shuffleGallery() {
+          document.querySelectorAll(".portfolio-wrapper .gallery").forEach(shuffleOneGallery);
         }
 
         /* ===== Router ===== */
@@ -2082,41 +2097,58 @@
 
             const res = await fetch("/portfolio-images");
             const gallery = await res.json();
+
+            function buildGalleryItem(item) {
+              const ext = item.url.split(".").pop().toLowerCase();
+              const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
+              return `
+                <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
+                  ${
+                    isVideo
+                      ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"><i class="fas fa-play-circle play-icon"></i></div>`
+                      : `<img data-src="${item.url}" alt="Artwork" decoding="async">`
+                  }
+                  ${item.caption ? `<div class="caption"></div>` : ""}
+                  ${
+                    token
+                      ? `
+                    <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                    <button class="caption-edit-btn">Edit Caption</button>
+                    <div class="caption-edit">
+                      <textarea placeholder="Add a caption..." maxlength="500"></textarea>
+                      <div class="caption-buttons">
+                        <button class="save-btn">Save</button>
+                        <button class="cancel-btn">Cancel</button>
+                      </div>
+                    </div>
+                  `
+                      : ""
+                  }
+                </div>`;
+            }
+
+            const photoItems = gallery.filter(i => !i.category || i.category === "photography");
+            const avItems    = gallery.filter(i => i.category === "audio-visual");
+
             content.innerHTML = `
               <section class="portfolio-wrapper">
-                <div class="gallery">
-                  ${gallery
-                    .map((item) => {
-                      const ext = item.url.split(".").pop().toLowerCase();
-                      const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
-                      return `
-                      <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}">
-                        ${
-                          isVideo
-                            ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"><i class="fas fa-play-circle play-icon"></i></div>`
-                            : `<img data-src="${item.url}" alt="Artwork" decoding="async">`
-                        }
-                        ${item.caption ? `<div class="caption"></div>` : ""}
-                        ${
-                          token
-                            ? `
-                          <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
-                          <button class="caption-edit-btn">Edit Caption</button>
-                          <div class="caption-edit">
-                            <textarea placeholder="Add a caption..." maxlength="500"></textarea>
-                            <div class="caption-buttons">
-                              <button class="save-btn">Save</button>
-                              <button class="cancel-btn">Cancel</button>
-                            </div>
-                          </div>
-                        `
-                            : ""
-                        }
-                      </div>`;
-                    })
-                    .join("")}
+                <h2 class="portfolio-section-heading">Photography</h2>
+                <div class="gallery" id="gallery-photography">
+                  ${photoItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No photos yet.</p>`}
                 </div>
-                ${token ? `<div class="upload"><h3>Upload New Work</h3><input type="file" id="portfolioUpload"></div>` : ""}
+                <h2 class="portfolio-section-heading">Audio Visual</h2>
+                <div class="gallery" id="gallery-av">
+                  ${avItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No audio visual work yet.</p>`}
+                </div>
+                ${token ? `
+                  <div class="upload">
+                    <h3>Upload New Work</h3>
+                    <select id="portfolioCategory" style="margin-bottom:0.75rem;">
+                      <option value="photography">Photography</option>
+                      <option value="audio-visual">Audio Visual</option>
+                    </select>
+                    <input type="file" id="portfolioUpload">
+                  </div>` : ""}
               </section>`;
             closeMenuOnLinkClick();
 
@@ -2169,7 +2201,7 @@
             });
 
             // Video placeholders: swap in real <video> element on click
-            document.querySelector(".gallery").addEventListener("click", (e) => {
+            document.querySelector(".portfolio-wrapper").addEventListener("click", (e) => {
               const placeholder = e.target.closest(".video-placeholder");
               if (!placeholder) return;
               const src = placeholder.dataset.src;
@@ -2236,6 +2268,8 @@
                   try {
                     const fd = new FormData();
                     fd.append("file", file);
+                    const catEl = document.getElementById("portfolioCategory");
+                    fd.append("category", catEl ? catEl.value : "photography");
                     const response = await fetch("/upload/portfolio", {
                       method: "POST",
                       headers: { Authorization: "Bearer " + token },

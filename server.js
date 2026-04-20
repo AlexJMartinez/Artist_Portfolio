@@ -464,12 +464,18 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
       }
     }
 
+    const rawCategory = req.body.category || "";
+    const category = ["photography", "audio-visual"].includes(rawCategory)
+      ? rawCategory
+      : "photography";
+
     const newItem = {
       id: Date.now(),
       url: `/uploads/portfolio/${req.file.filename}`,
       uploadedAt: new Date().toISOString(),
       fileType: req.file.mimetype,
       caption: "",
+      category,
       ...(thumbnailUrl && { thumbnailUrl }),
       ...(aspectRatio && { aspectRatio }),
     };

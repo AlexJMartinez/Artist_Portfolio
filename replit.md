@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **Interactive Elements**: Font Awesome icons for UI elements
 - **Authentication State**: Client-side token management for admin login sessions
 - **Portfolio Performance**: Skeleton shimmer loading screen, IntersectionObserver for progressive image loading (data-src → src), video click-to-load placeholders to avoid downloading large MP4s upfront
+- **Portfolio Categories**: Portfolio page is split into two grids — "Photography" (default) and "Audio Visual". Items without a category are shown in Photography. Admins pick a category from a dropdown when uploading.
 
 ## Backend Architecture
 - **Express.js Server**: RESTful API endpoints for portfolio management, file uploads, authentication, and subscriber management
