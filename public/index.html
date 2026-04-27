@@ -982,6 +982,20 @@
       .contact-card {
         max-width: 400px;
       }
+      .contact-email-note {
+        text-align: center;
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 0.85rem;
+        margin-top: 1rem;
+        font-style: italic;
+      }
+      .contact-email-note a {
+        color: rgba(0, 0, 0, 0.55);
+        text-decoration: underline;
+      }
+      .contact-email-note a:hover {
+        color: rgba(0, 0, 0, 0.8);
+      }
       @media (max-width: 600px) {
         .login-card,
         .contact-card {
@@ -2458,6 +2472,7 @@
                     <button type="submit">Send</button>
                   </form>
                 </div>
+                <p class="contact-email-note">Or... <a href="mailto:alexjmartinez0502@gmail.com">alexjmartinez0502@gmail.com</a></p>
               </div>`;
             closeMenuOnLinkClick();
             document
