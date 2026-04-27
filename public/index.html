@@ -121,11 +121,12 @@
 
 
       /* Mobile dropdown */
-      @media (max-width: 700px) {
+      @media (max-width: 768px) {
         .nav-toggle {
           display: inline-flex;
         }
         nav ul {
+          display: none;
           position: absolute;
           top: 100%;
           left: 0;
@@ -135,13 +136,10 @@
           background: rgba(255, 255, 255, 0.9);
           backdrop-filter: blur(8px);
           border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-          max-height: 0;
-          overflow: hidden;
           padding: 0 1rem;
-          transition: max-height 0.25s ease;
         }
         nav.open ul {
-          max-height: 260px;
+          display: flex;
           padding: 0.5rem 1rem 0.75rem;
         }
         nav ul li {
@@ -1382,18 +1380,29 @@
         const toggleBtn = document.querySelector(".nav-toggle");
 
         /* ===== Hamburger logic ===== */
+        const navUl = nav.querySelector("ul");
         function setMenu(open) {
           nav.classList.toggle("open", open);
           toggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+          if (navUl) navUl.setAttribute("aria-hidden", open ? "false" : "true");
           adjustMainPadding();
         }
+        setMenu(false); // Initialise closed state
         toggleBtn.addEventListener("click", () =>
           setMenu(!nav.classList.contains("open")),
         );
+        // Close menu when tapping outside the nav on mobile
+        document.addEventListener("click", (e) => {
+          if (nav.classList.contains("open") && !nav.contains(e.target)) {
+            setMenu(false);
+          }
+        });
+        // Close menu when any nav link is clicked (event delegation)
+        nav.addEventListener("click", (e) => {
+          if (e.target.closest("a")) setMenu(false);
+        });
         function closeMenuOnLinkClick() {
-          document
-            .querySelectorAll("nav a")
-            .forEach((a) => a.addEventListener("click", () => setMenu(false)));
+          // No-op: handled by nav-level delegation above
         }
 
         /* ===== Dynamic Library Loading ===== */
@@ -2338,8 +2347,6 @@
         function updateNavigation() {
           const loginBtn = document.getElementById("loginBtn");
           const logoutBtn = document.getElementById("logoutBtn");
-          const pillLoginBtn = document.getElementById("pillLoginBtn");
-          const pillLogoutBtn = document.getElementById("pillLogoutBtn");
 
           // reflect state on <body>
           document.body.classList.toggle("owner-mode", ownerMode);
@@ -2349,13 +2356,8 @@
           const showLogout = !!token; // logged in
 
           if (loginBtn) loginBtn.style.display = showLogin ? "block" : "none";
-          if (pillLoginBtn)
-            pillLoginBtn.style.display = showLogin ? "block" : "none";
-
           if (logoutBtn)
             logoutBtn.style.display = showLogout ? "block" : "none";
-          if (pillLogoutBtn)
-            pillLogoutBtn.style.display = showLogout ? "block" : "none";
         }
 
         /* ===== Typing effect ===== */
