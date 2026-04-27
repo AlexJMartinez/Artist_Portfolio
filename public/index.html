@@ -375,11 +375,11 @@
         }
       }
 
-      /* ===== MOBILE: 2-column masonry ===== */
+      /* ===== MOBILE: single-column ===== */
       @media (max-width: 768px) {
         .gallery {
-          column-count: 2;
-          column-gap: 0.75rem;
+          column-count: 1;
+          column-gap: 0;
         }
 
         .gallery-item {
@@ -392,13 +392,7 @@
         }
       }
 
-      /* ===== NARROW PHONE: single-column full-width ===== */
       @media (max-width: 500px) {
-        .gallery {
-          column-count: 1;
-          column-gap: 0;
-        }
-
         .gallery-item {
           margin-bottom: 1.5rem;
         }
@@ -906,13 +900,11 @@
       }
 
       /* HIDE login by default */
-      #loginBtn,
-      #pillLoginBtn {
+      #loginBtn {
         display: none !important;
       }
       /* SHOW login only when you’ve enabled owner mode AND you are NOT authenticated */
-      .owner-mode:not(.is-auth) #loginBtn,
-      .owner-mode:not(.is-auth) #pillLoginBtn {
+      .owner-mode:not(.is-auth) #loginBtn {
         display: inline-block !important;
       }
 
@@ -954,13 +946,11 @@
       }
 
       /* HIDE logout by default */
-      #logoutBtn,
-      #pillLogoutBtn {
+      #logoutBtn {
         display: none !important;
       }
       /* SHOW logout only when authenticated */
-      .is-auth #logoutBtn,
-      .is-auth #pillLogoutBtn {
+      .is-auth #logoutBtn {
         display: inline-block !important;
       }
 
@@ -1054,8 +1044,7 @@
         main {
           padding-left: 1rem;
           padding-right: 1rem;
-          padding-bottom: 7rem; /* Extra space for floating nav */
-        }
+          }
         .hero {
           padding: 0 1rem;
           min-height: 70vh;
@@ -1066,199 +1055,6 @@
         }
       }
 
-      /* ===== FLOATING PILL NAVIGATION ===== */
-      .floating-nav {
-        display: none; /* Hidden by default, shown on mobile */
-        position: fixed;
-        bottom: env(safe-area-inset-bottom, 24px);
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-        pointer-events: none;
-      }
-
-      .floating-nav-pill {
-        position: relative;
-        display: flex;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 28px;
-        padding: 8px 12px;
-        box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.1),
-          0 2px 8px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        pointer-events: auto;
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
-      }
-
-      .floating-nav-pill:hover {
-        transform: translateY(-2px);
-        box-shadow:
-          0 12px 40px rgba(0, 0, 0, 0.15),
-          0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-
-      .floating-nav-item {
-        position: relative;
-        display: grid;
-        place-items: center;
-        width: 56px;
-        height: 56px;
-        margin: 0 4px;
-        border-radius: 50%;
-        color: #666;
-        font-size: 22px;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        z-index: 2;
-      }
-
-      .floating-nav-item i {
-        position: static;
-        display: inline-block;
-        width: 1.25em;
-        text-align: center;
-        line-height: 1;
-        transition: transform 0.2s ease;
-      }
-
-      .floating-nav-item:hover {
-        color: #333;
-        transform: scale(1.05);
-      }
-
-      .floating-nav-item:hover i {
-        transform: scale(1.1);
-      }
-
-      .floating-nav-item.active {
-        color: #fff;
-        font-weight: 500;
-      }
-
-      .floating-nav-active-bg {
-        position: absolute;
-        top: 8px;
-        left: 0;
-        width: 56px;
-        height: 56px;
-        background: #e63946;
-        border-radius: 50%;
-        transform: translateX(0);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1;
-        box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
-      }
-
-      .floating-nav-overflow {
-        position: relative;
-        cursor: pointer;
-      }
-
-      .floating-nav-overflow-menu {
-        position: absolute;
-        bottom: 100%;
-        right: 0;
-        margin-bottom: 8px;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 16px;
-        padding: 8px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        opacity: 0;
-        transform: translateY(8px) scale(0.9);
-        transition: all 0.2s ease;
-        pointer-events: none;
-        min-width: 120px;
-      }
-
-      .floating-nav-overflow-menu.show {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        pointer-events: auto;
-      }
-
-      .floating-nav-overflow-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        margin: 2px 0;
-        border-radius: 8px;
-        color: #666;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.15s ease;
-      }
-
-      .floating-nav-overflow-item:hover {
-        background: rgba(230, 57, 70, 0.1);
-        color: #e63946;
-      }
-
-      .floating-nav-overflow-item i {
-        width: 16px;
-        font-size: 14px;
-      }
-
-      /* Show floating nav on mobile and hide web navbar - More aggressive approach */
-      @media screen and (max-width: 768px) {
-        .floating-nav {
-          display: block !important;
-        }
-        nav {
-          display: none !important;
-        }
-      }
-
-      /* Force mobile nav on any narrow screen */
-      @media (max-width: 768px) {
-        .floating-nav {
-          display: block !important;
-        }
-        nav {
-          display: none !important;
-        }
-      }
-
-      /* Ensure floating nav works on touch devices */
-      @media (hover: none) and (pointer: coarse) and (max-width: 768px) {
-        .floating-nav {
-          display: block !important;
-        }
-        nav {
-          display: none !important;
-        }
-      }
-
-      /* Fallback for very specific mobile conditions */
-      @media only screen and (max-device-width: 480px) {
-        .floating-nav {
-          display: block !important;
-        }
-        nav {
-          display: none !important;
-        }
-      }
-
-      /* Respect reduced motion */
-      @media (prefers-reduced-motion: reduce) {
-        .floating-nav-pill,
-        .floating-nav-item,
-        .floating-nav-active-bg,
-        .floating-nav-overflow-menu {
-          transition: none;
-        }
       }
 
       /* ===== DEBT FORTUNES CAROUSEL ===== */
@@ -1523,73 +1319,6 @@
         <span class="hint-arrow left">&#8249;</span>
         <span class="hint-label">swipe</span>
         <span class="hint-arrow right">&#8250;</span>
-      </div>
-    </div>
-
-    <!-- Floating Mobile Navigation -->
-    <div class="floating-nav">
-      <div class="floating-nav-pill">
-        <div class="floating-nav-active-bg"></div>
-        <a
-          class="floating-nav-item"
-          onclick="loadPage('home')"
-          data-page="home"
-        >
-          <i class="fas fa-home fa-fw"></i>
-        </a>
-        <a
-          class="floating-nav-item"
-          onclick="loadPage('portfolio')"
-          data-page="portfolio"
-        >
-          <i class="fas fa-th-large fa-fw"></i>
-        </a>
-        <a
-          class="floating-nav-item"
-          onclick="loadPage('about')"
-          data-page="about"
-        >
-          <i class="fas fa-user fa-fw"></i>
-        </a>
-        <div class="floating-nav-overflow floating-nav-item">
-          <i class="fas fa-ellipsis-h fa-fw"></i>
-          <div class="floating-nav-overflow-menu">
-            <a
-              class="floating-nav-overflow-item"
-              onclick="loadPage('development')"
-              data-page="development"
-            >
-              <i class="fas fa-code"></i>
-              <span>Development</span>
-            </a>
-            <a
-              class="floating-nav-overflow-item"
-              onclick="loadPage('contact')"
-              data-page="contact"
-            >
-              <i class="fas fa-envelope"></i>
-              <span>Contact</span>
-            </a>
-            <a
-              class="floating-nav-overflow-item"
-              id="pillLoginBtn"
-              onclick="loadPage('login')"
-              data-page="login"
-            >
-              <i class="fas fa-sign-in-alt"></i>
-              <span>Login</span>
-            </a>
-            <a
-              class="floating-nav-overflow-item"
-              id="pillLogoutBtn"
-              onclick="logout()"
-              style="display: none"
-            >
-              <i class="fas fa-sign-out-alt"></i>
-              <span>Logout</span>
-            </a>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -3109,131 +2838,15 @@
           updateCarousel(false);
         }
 
-        /* ===== Floating Navigation ===== */
-        function initFloatingNav() {
-          const floatingNav = document.querySelector(".floating-nav");
-          const navItems = document.querySelectorAll(
-            ".floating-nav-item:not(.floating-nav-overflow)",
-          );
-          const activeBg = document.querySelector(".floating-nav-active-bg");
-          const overflowBtn = document.querySelector(".floating-nav-overflow");
-          const overflowMenu = document.querySelector(
-            ".floating-nav-overflow-menu",
-          );
-
-          if (!floatingNav) return;
-
-          // Move active background to specific item
-          function moveActiveBgTo(activeItem) {
-            const pill = document.querySelector(".floating-nav-pill");
-            const bg = pill.querySelector(".floating-nav-active-bg");
-            const x =
-              activeItem.offsetLeft +
-              (activeItem.offsetWidth - bg.offsetWidth) / 2;
-            bg.style.transform = `translateX(${Math.round(x)}px)`;
-          }
-
-          // Set active state and move background
-          function setActiveNav(page) {
-            navItems.forEach((item) => {
-              const itemPage = item.getAttribute("data-page");
-              if (itemPage === page) {
-                item.classList.add("active");
-                moveActiveBgTo(item);
-              } else {
-                item.classList.remove("active");
-              }
-            });
-          }
-
-          // Handle overflow menu
-          if (overflowBtn && overflowMenu) {
-            overflowBtn.addEventListener("click", (e) => {
-              e.stopPropagation();
-              overflowMenu.classList.toggle("show");
-            });
-
-            // Close overflow menu when clicking outside
-            document.addEventListener("click", (e) => {
-              if (!overflowBtn.contains(e.target)) {
-                overflowMenu.classList.remove("show");
-              }
-            });
-
-            // Close overflow menu when clicking an item
-            document
-              .querySelectorAll(".floating-nav-overflow-item")
-              .forEach((item) => {
-                item.addEventListener("click", () => {
-                  overflowMenu.classList.remove("show");
-                });
-              });
-          }
-
-          // Update active state when page changes
-          window.updateFloatingNav = setActiveNav;
-        }
-
-        function recalcFloatingNavBg() {
-          const pill = document.querySelector(".floating-nav-pill");
-          const bg = pill?.querySelector(".floating-nav-active-bg");
-          const activeItem =
-            document.querySelector(".floating-nav-item.active") ||
-            document.querySelector('.floating-nav-item[data-page="home"]');
-          if (!pill || !bg || !activeItem) return;
-
-          // If you want the first position jump to be instant, briefly disable transition:
-          const prev = bg.style.transition;
-          bg.style.transition = "none";
-          // let layout settle, then move
-          requestAnimationFrame(() => {
-            const x =
-              activeItem.offsetLeft +
-              (activeItem.offsetWidth - bg.offsetWidth) / 2;
-            bg.style.transform = `translateX(${Math.round(x)}px)`;
-            // restore transition for future moves
-            requestAnimationFrame(() => (bg.style.transition = prev || ""));
-          });
-        }
-
-        // after you update the floating nav on page changes:
-        const originalLoadPage = loadPage;
-        loadPage = function (page) {
-          originalLoadPage(page);
-          // Reset scroll position to top when navigating between pages
-          window.scrollTo(0, 0);
-          if (window.updateFloatingNav) window.updateFloatingNav(page);
-          recalcFloatingNavBg();
-        };
-
-        // on resize and breakpoint changes:
-        const mq = window.matchMedia("(max-width:700px)");
-        mq.addEventListener?.("change", () => {
-          // when pill switches between display:none/block
-          if (mq.matches) setTimeout(recalcFloatingNavBg, 0);
-        });
-        window.addEventListener("resize", () => {
-          // debounce if you like; simple is fine here
-          recalcFloatingNavBg();
-        });
-
-        // when icon fonts finish loading:
-        if (document.fonts?.ready) {
-          document.fonts.ready.then(recalcFloatingNavBg);
-        }
-
-        // (nice-to-have) if you want rock-solid behavior on any layout change:
-        new ResizeObserver(recalcFloatingNavBg).observe(
-          document.querySelector(".floating-nav-pill"),
-        );
+        // Scroll to top on page navigation
+        const _origLoadPage = loadPage;
+        loadPage = function(page) { _origLoadPage(page); window.scrollTo(0, 0); };
 
         window.addEventListener("scroll", handleScroll, {
           passive: true,
         });
         handleScroll(); // initialize state on load/restore
         /* Boot */
-        initFloatingNav();
-        recalcFloatingNavBg();
         updateNavigation(); // Set initial navigation state
         loadPage("home");
 
