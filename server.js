@@ -1052,9 +1052,13 @@ app.use(
   express.static(path.join(__dirname, "public"), {
     maxAge: "1d", // Cache for 1 day
     etag: true,
-    setHeaders: (res, path) => {
+    setHeaders: (res, filePath) => {
+      // Never cache HTML — always serve fresh so CSS/JS changes reach users immediately
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-store, must-revalidate");
+      }
       // Cache uploaded files for longer since they have unique names
-      if (path.includes("/uploads/")) {
+      if (filePath.includes("/uploads/")) {
         res.setHeader("Cache-Control", "public, max-age=31536000, immutable"); // 1 year
       }
     },
