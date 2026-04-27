@@ -437,6 +437,20 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
+      .dev-gumroad-note {
+        text-align: center;
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 0.85rem;
+        margin: 2rem auto 0.5rem;
+        font-style: italic;
+      }
+      .dev-gumroad-note a {
+        color: rgba(0, 0, 0, 0.55);
+        text-decoration: underline;
+      }
+      .dev-gumroad-note a:hover {
+        color: rgba(0, 0, 0, 0.8);
+      }
       .dev-add-form {
         display: flex;
         flex-direction: column;
@@ -2336,6 +2350,7 @@
                   </div>`
                     : ""
                 }
+                <p class="dev-gumroad-note">Try any current tools in Dev via the following Gumroad link: <a href="https://ohseven.gumroad.com/" target="_blank" rel="noopener noreferrer">ohseven.gumroad.com</a></p>
               </section>`;
             closeMenuOnLinkClick();
 
