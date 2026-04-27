@@ -982,6 +982,14 @@
       .contact-card {
         max-width: 400px;
       }
+      .contact-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        box-sizing: border-box;
+        padding: 0;
+      }
       .contact-email-note {
         text-align: center;
         color: rgba(0, 0, 0, 0.45);
@@ -2462,7 +2470,7 @@
 
           if (page === "contact") {
             content.innerHTML = `
-              <div class="login-container">
+              <div class="contact-container">
                 <div class="contact-card">
                   <h2 style="text-align:center;">Contact</h2>
                   <form id="contactForm">
