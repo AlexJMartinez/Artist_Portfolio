@@ -1042,7 +1042,7 @@
         main {
           padding-left: 1rem;
           padding-right: 1rem;
-          }
+        }
         .hero {
           padding: 0 1rem;
           min-height: 70vh;
@@ -1051,8 +1051,6 @@
           padding: 0 0.5rem;
           max-width: 90vw;
         }
-      }
-
       }
 
       /* ===== DEBT FORTUNES CAROUSEL ===== */
@@ -1401,9 +1399,6 @@
         nav.addEventListener("click", (e) => {
           if (e.target.closest("a")) setMenu(false);
         });
-        function closeMenuOnLinkClick() {
-          // No-op: handled by nav-level delegation above
-        }
 
         /* ===== Dynamic Library Loading ===== */
         let gsapLoaded = false;
@@ -1503,7 +1498,6 @@
                 </a>
               </div>
             </section>`;
-            closeMenuOnLinkClick();
             startTypingEffect("subtitle", "Minimalist Abstract Expression");
 
             // Add subscribe form event listener
@@ -1617,7 +1611,6 @@
                 </div>
               </section>
               ${token ? `<div class="upload"><h3>Update About</h3><input type="file" id="aboutUpload"></div>` : ""}`;
-            closeMenuOnLinkClick();
             initDebtCarousel(); // Initialize the carousel
 
             if (token) {
@@ -1716,7 +1709,6 @@
                     <input type="file" id="portfolioUpload">
                   </div>` : ""}
               </section>`;
-            closeMenuOnLinkClick();
 
             // Safely set caption text content and textarea values to prevent XSS
             gallery.forEach((item, index) => {
@@ -2112,7 +2104,6 @@
                 }
                 <p class="dev-gumroad-note">Try any current tools in Dev via the following Gumroad link: <a href="https://ohseven.gumroad.com/" target="_blank" rel="noopener noreferrer">ohseven.gumroad.com</a></p>
               </section>`;
-            closeMenuOnLinkClick();
 
             // Safely set title text to prevent XSS
             devItems.forEach((item) => {
@@ -2220,7 +2211,6 @@
                 </div>
                 <p class="contact-email-note">Or... <a href="mailto:alexjmartinez0502@gmail.com">alexjmartinez0502@gmail.com</a></p>
               </div>`;
-            closeMenuOnLinkClick();
             document
               .getElementById("contactForm")
               .addEventListener("submit", async (e) => {
@@ -2266,7 +2256,6 @@
                 </form>
               </div>
             </div>`;
-            closeMenuOnLinkClick();
             document
               .getElementById("loginForm")
               .addEventListener("submit", async (e) => {
