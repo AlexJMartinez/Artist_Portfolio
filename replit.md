@@ -19,7 +19,7 @@ Preferred communication style: Simple, everyday language.
 ## Backend Architecture
 - **Express.js Server**: RESTful API endpoints for portfolio management, file uploads, authentication, and subscriber management
 - **File Storage**: Local filesystem storage with organized directory structure (`uploads/about/`, `uploads/portfolio/`, `uploads/shop/`)
-- **Authentication**: Simple token-based authentication with hardcoded admin credentials (`Martin3z` / `May2nd1989`)
+- **Authentication**: Token-based authentication; admin username defaults to `Martin3z` (overridable via `ADMIN_USER` env var) and the password is verified against a bcrypt hash stored in the `ADMIN_PASS_HASH` secret — there is no hardcoded plaintext password, so check that secret (or ask the user) rather than assuming old credentials still work
 - **File Upload Handling**: Multer middleware for processing multipart form data and file uploads with automatic filename generation
 
 ## Data Storage

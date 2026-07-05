@@ -723,13 +723,16 @@ app.get("/development-videos", (req, res) => {
 
 app.post("/development-videos", auth, (req, res) => {
   try {
-    const { youtubeUrl, title } = req.body;
+    const { youtubeUrl, title, description } = req.body;
     if (!youtubeUrl) {
       return res.status(400).json({ error: "youtubeUrl is required" });
     }
     const videoId = extractYouTubeId(youtubeUrl);
     if (!videoId) {
       return res.status(400).json({ error: "Invalid YouTube URL" });
+    }
+    if (description && description.length > 500) {
+      return res.status(400).json({ error: "Description must be 500 characters or fewer" });
     }
 
     let items = [];
@@ -742,6 +745,7 @@ app.post("/development-videos", auth, (req, res) => {
       videoId,
       youtubeUrl: `https://www.youtube.com/watch?v=${videoId}`,
       title: (title || "").trim(),
+      description: (description || "").trim(),
       addedAt: new Date().toISOString(),
     };
 

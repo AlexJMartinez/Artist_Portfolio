@@ -468,6 +468,7 @@
         height: 100%;
         border: 0;
         display: block;
+        pointer-events: none;
       }
       .dev-row-media .delete-btn {
         background: rgba(0, 0, 0, 0.55) !important;
@@ -494,6 +495,8 @@
         color: #555;
         line-height: 1.6;
         margin: 0 0 1.25rem;
+        overflow-wrap: break-word;
+        word-break: break-word;
       }
       .dev-row-expand {
         display: inline-flex;
@@ -545,9 +548,12 @@
         max-width: 500px;
         margin: 2rem auto 0;
       }
-      .dev-add-form input {
+      .dev-add-form input,
+      .dev-add-form textarea {
         width: 100%;
         box-sizing: border-box;
+        font-family: inherit;
+        resize: vertical;
       }
       .dev-add-form button {
         align-self: flex-start;
@@ -2153,7 +2159,7 @@
                     <div class="dev-row-media">
                       <iframe
                         class="dev-row-iframe"
-                        src="https://www.youtube.com/embed/${item.videoId}?enablejsapi=1&mute=1&rel=0&playsinline=1"
+                        src="https://www.youtube.com/embed/${item.videoId}?enablejsapi=1&mute=1&rel=0&playsinline=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&modestbranding=1&showinfo=0"
                         title="${safeAlt}"
                         loading="lazy"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -2163,7 +2169,7 @@
                     </div>
                     <div class="dev-row-text">
                       <h3 class="dev-row-title"></h3>
-                      <p class="dev-row-desc">An in-progress look at one of the current development projects.</p>
+                      <p class="dev-row-desc"></p>
                       <button class="dev-row-expand" data-video-id="${item.videoId}" data-title="${item.title ? safeAlt : ''}">
                         <i class="fas fa-expand"></i> Watch fullscreen
                       </button>
@@ -2180,6 +2186,7 @@
                     <div class="dev-add-form">
                       <input type="url" id="devYoutubeUrl" placeholder="YouTube URL (e.g. https://youtu.be/...)" />
                       <input type="text" id="devTitle" placeholder="Title (optional)" />
+                      <textarea id="devDescription" placeholder="Description (optional)" rows="3" maxlength="500"></textarea>
                       <button id="devAddBtn">Add Video</button>
                     </div>
                   </div>`
@@ -2188,10 +2195,16 @@
                 <p class="dev-gumroad-note">Try any current tools in Dev via the following Gumroad link: <a href="https://ohseven.gumroad.com/" target="_blank" rel="noopener noreferrer">ohseven.gumroad.com</a></p>
               </section>`;
 
-            // Safely set title text to prevent XSS
+            // Safely set title/description text to prevent XSS
             devItems.forEach((item) => {
-              const el = document.querySelector(`[data-id="${item.id}"] .dev-row-title`);
-              if (el) el.textContent = item.title || "Untitled Project";
+              const titleEl = document.querySelector(`[data-id="${item.id}"] .dev-row-title`);
+              if (titleEl) titleEl.textContent = item.title || "Untitled Project";
+              const descEl = document.querySelector(`[data-id="${item.id}"] .dev-row-desc`);
+              if (descEl) {
+                descEl.textContent =
+                  item.description ||
+                  "An in-progress look at one of the current development projects.";
+              }
             });
 
             // Build ordered list of video objects for lightbox navigation
@@ -2253,8 +2266,10 @@
               document.getElementById("devAddBtn")?.addEventListener("click", async () => {
                 const urlInput = document.getElementById("devYoutubeUrl");
                 const titleInput = document.getElementById("devTitle");
+                const descriptionInput = document.getElementById("devDescription");
                 const youtubeUrl = urlInput.value.trim();
                 const title = titleInput.value.trim();
+                const description = descriptionInput.value.trim();
                 if (!youtubeUrl) { alert("Please enter a YouTube URL."); return; }
                 try {
                   const r = await fetch("/development-videos", {
@@ -2263,7 +2278,7 @@
                       Authorization: "Bearer " + token,
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ youtubeUrl, title }),
+                    body: JSON.stringify({ youtubeUrl, title, description }),
                   });
                   const result = await r.json();
                   if (r.ok) {

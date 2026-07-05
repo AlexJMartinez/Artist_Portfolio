@@ -1,0 +1,1 @@
+- [Admin auth uses bcrypt env secret](admin-auth-credentials.md) — replit.md's old hardcoded admin password is stale; don't assume it still works.
