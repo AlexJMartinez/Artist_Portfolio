@@ -334,6 +334,20 @@
         column-count: 3;
         column-gap: 2rem;
       }
+      /* Fallback grid layout for galleries with very few items (<= column
+         count): native CSS column-balance masonry can incorrectly stack
+         a small number of tall items into a single column instead of
+         spreading them out, so we use an explicit grid instead. */
+      .gallery.gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 2rem;
+        row-gap: 1rem;
+        align-items: start;
+      }
+      .gallery.gallery-grid .gallery-item {
+        margin-bottom: 0;
+      }
       .gallery-item {
         display: inline-block;
         width: 100%;
@@ -377,6 +391,10 @@
           column-count: 2;
           column-gap: 1.5rem;
         }
+        .gallery.gallery-grid {
+          grid-template-columns: repeat(2, 1fr);
+          column-gap: 1.5rem;
+        }
       }
 
       /* ===== MOBILE: single-column ===== */
@@ -384,6 +402,10 @@
         .gallery {
           column-count: 1;
           column-gap: 0;
+        }
+        .gallery.gallery-grid {
+          grid-template-columns: 1fr;
+          row-gap: 0.75rem;
         }
 
         .gallery-item {
@@ -399,6 +421,9 @@
       @media (max-width: 500px) {
         .gallery-item {
           margin-bottom: 1.5rem;
+        }
+        .gallery.gallery-grid {
+          row-gap: 1.5rem;
         }
 
         .gallery-item img,
@@ -1749,7 +1774,7 @@
                   ${
                     isVideo
                       ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"></div>`
-                      : `<img data-src="${item.url}" alt="Artwork" decoding="async">`
+                      : `<img data-src="${item.url}" alt="Artwork" decoding="async"${item.aspectRatio ? ` style="aspect-ratio: ${item.aspectRatio}; object-fit: cover;"` : ""}>`
                   }
                   ${item.caption ? `<div class="caption"></div>` : ""}
                   ${
@@ -1775,23 +1800,32 @@
             const avItems       = gallery.filter(i => i.category === "audio-visual");
             const paintingItems = gallery.filter(i => i.category === "painting");
 
+            // Galleries with only a handful of items (<= 3, the desktop
+            // column count) use an explicit CSS grid instead of the
+            // column-balance masonry layout, since native CSS columns can
+            // incorrectly stack a small number of tall items into a single
+            // column instead of spreading them out across the row.
+            function galleryClass(items) {
+              return items.length > 0 && items.length <= 3 ? "gallery gallery-grid" : "gallery";
+            }
+
             content.innerHTML = `
               <section class="portfolio-wrapper">
                 <div class="portfolio-section">
                   <h2 class="portfolio-section-heading">Photography</h2>
-                  <div class="gallery" id="gallery-photography">
+                  <div class="${galleryClass(photoItems)}" id="gallery-photography">
                     ${photoItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No photos yet.</p>`}
                   </div>
                 </div>
                 <div class="portfolio-section">
                   <h2 class="portfolio-section-heading">Audio Visual</h2>
-                  <div class="gallery" id="gallery-av">
+                  <div class="${galleryClass(avItems)}" id="gallery-av">
                     ${avItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No audio visual work yet.</p>`}
                   </div>
                 </div>
                 <div class="portfolio-section">
                   <h2 class="portfolio-section-heading">Painting</h2>
-                  <div class="gallery" id="gallery-painting">
+                  <div class="${galleryClass(paintingItems)}" id="gallery-painting">
                     ${paintingItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No paintings yet.</p>`}
                   </div>
                 </div>
@@ -2544,7 +2578,7 @@
           const videoId = item.videoId;
           lightboxContent.innerHTML = "";
           const iframe = document.createElement("iframe");
-          iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+          iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&disablekb=1&iv_load_policy=3&modestbranding=1&showinfo=0`;
           iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
           iframe.allowFullscreen = true;
           lightboxContent.appendChild(iframe);

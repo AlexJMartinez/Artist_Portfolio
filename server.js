@@ -224,6 +224,24 @@ async function compressImage(filePath, mimetype) {
   }
 }
 
+// Detect an image's aspect ratio (as a "W / H" CSS ratio string) so the
+// frontend can reserve correct space for lazy-loaded images before they
+// finish downloading, avoiding masonry column-balance glitches.
+async function getImageAspectRatio(filePath) {
+  try {
+    const metadata = await sharp(filePath).metadata();
+    const width = metadata.width || 0;
+    const height = metadata.height || 0;
+    if (!width || !height) return null;
+    const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
+    const g = gcd(width, height);
+    return `${width / g} / ${height / g}`;
+  } catch (err) {
+    console.error("Image aspect ratio detection failed:", err.message);
+    return null;
+  }
+}
+
 // Extract first frame thumbnail and dimensions from a video file using ffmpeg/ffprobe
 async function generateVideoThumbnail(videoPath) {
   try {
@@ -452,7 +470,9 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
     const filePath = path.join(__dirname, "uploads", "portfolio", req.file.filename);
     await compressImage(filePath, req.file.mimetype);
 
-    // For video uploads, extract first-frame thumbnail and detect aspect ratio
+    // For video uploads, extract first-frame thumbnail and detect aspect ratio.
+    // For image uploads, detect aspect ratio so the frontend can reserve
+    // correct masonry grid space before the lazy-loaded image finishes downloading.
     const isVideoUpload = req.file.mimetype && req.file.mimetype.startsWith("video/");
     let thumbnailUrl = null;
     let aspectRatio = null;
@@ -462,6 +482,8 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
         thumbnailUrl = thumbResult.thumbnailUrl;
         aspectRatio = thumbResult.aspectRatio;
       }
+    } else {
+      aspectRatio = await getImageAspectRatio(filePath);
     }
 
     const rawCategory = req.body.category || "";
