@@ -1728,13 +1728,22 @@
             const res = await fetch("/portfolio-images");
             const gallery = await res.json();
 
+            const categoryOrder = ["photography", "audio-visual", "painting"];
+            const categoryLabels = {
+              photography: "Photography",
+              "audio-visual": "Audio Visual",
+              painting: "Painting",
+            };
+            function nextCategory(cat) {
+              const idx = categoryOrder.indexOf(cat);
+              return categoryOrder[(idx + 1) % categoryOrder.length];
+            }
+
             function buildGalleryItem(item) {
               const ext = item.url.split(".").pop().toLowerCase();
               const isVideo = ["mp4", "webm", "ogg", "mov"].includes(ext);
               const itemCategory = item.category || "photography";
-              const moveLabel = itemCategory === "audio-visual"
-                ? "→ Photography"
-                : "→ Audio Visual";
+              const moveLabel = `→ ${categoryLabels[nextCategory(itemCategory)]}`;
               return `
                 <div class="gallery-item ${token ? "admin" : ""}" data-id="${item.id}" data-category="${itemCategory}">
                   ${
@@ -1762,8 +1771,9 @@
                 </div>`;
             }
 
-            const photoItems = gallery.filter(i => !i.category || i.category === "photography");
-            const avItems    = gallery.filter(i => i.category === "audio-visual");
+            const photoItems    = gallery.filter(i => !i.category || i.category === "photography");
+            const avItems       = gallery.filter(i => i.category === "audio-visual");
+            const paintingItems = gallery.filter(i => i.category === "painting");
 
             content.innerHTML = `
               <section class="portfolio-wrapper">
@@ -1779,12 +1789,19 @@
                     ${avItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No audio visual work yet.</p>`}
                   </div>
                 </div>
+                <div class="portfolio-section">
+                  <h2 class="portfolio-section-heading">Painting</h2>
+                  <div class="gallery" id="gallery-painting">
+                    ${paintingItems.map(buildGalleryItem).join("") || `<p style="color:rgba(255,255,255,0.35);grid-column:1/-1;padding:1.5rem 0;">No paintings yet.</p>`}
+                  </div>
+                </div>
                 ${token ? `
                   <div class="upload">
                     <h3>Upload New Work</h3>
                     <select id="portfolioCategory" style="margin-bottom:0.75rem;">
                       <option value="photography">Photography</option>
                       <option value="audio-visual">Audio Visual</option>
+                      <option value="painting">Painting</option>
                     </select>
                     <input type="file" id="portfolioUpload">
                   </div>` : ""}
@@ -1967,7 +1984,7 @@
                   });
                 });
 
-              // Move between Photography / Audio Visual
+              // Cycle between Photography / Audio Visual / Painting
               document
                 .querySelectorAll(".gallery-item .move-category-btn")
                 .forEach((btn) => {
@@ -1976,10 +1993,7 @@
                     const item = btn.closest(".gallery-item");
                     const id = item.dataset.id;
                     const currentCategory = item.dataset.category;
-                    const newCategory =
-                      currentCategory === "audio-visual"
-                        ? "photography"
-                        : "audio-visual";
+                    const newCategory = nextCategory(currentCategory);
                     try {
                       const response = await fetch(
                         `/portfolio/${id}/category`,

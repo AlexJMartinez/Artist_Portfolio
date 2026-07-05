@@ -465,7 +465,7 @@ app.post("/upload/portfolio", auth, upload.single("file"), async (req, res) => {
     }
 
     const rawCategory = req.body.category || "";
-    const category = ["photography", "audio-visual"].includes(rawCategory)
+    const category = ["photography", "audio-visual", "painting"].includes(rawCategory)
       ? rawCategory
       : "photography";
 
@@ -641,7 +641,7 @@ app.patch(
 app.patch("/portfolio/:id/category", auth, (req, res) => {
   try {
     const rawCategory = req.body.category || "";
-    const category = ["photography", "audio-visual"].includes(rawCategory)
+    const category = ["photography", "audio-visual", "painting"].includes(rawCategory)
       ? rawCategory
       : null;
     if (!category) {

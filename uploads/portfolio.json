@@ -61,5 +61,21 @@
     "thumbnailUrl": "/uploads/portfolio/thumb_1757702302197-393174742.jpg",
     "aspectRatio": "16 / 9",
     "category": "audio-visual"
+  },
+  {
+    "id": 1783271267568,
+    "url": "/uploads/portfolio/1783271266352-693000129.PNG",
+    "uploadedAt": "2026-07-05T17:07:47.568Z",
+    "fileType": "image/png",
+    "caption": "",
+    "category": "painting"
+  },
+  {
+    "id": 1783271281044,
+    "url": "/uploads/portfolio/1783271279939-864330810.png",
+    "uploadedAt": "2026-07-05T17:08:01.044Z",
+    "fileType": "image/png",
+    "caption": "",
+    "category": "photography"
   }
 ]
