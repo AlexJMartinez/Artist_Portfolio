@@ -424,16 +424,105 @@
       }
 
       /* ===== DEVELOPMENT PAGE ===== */
-      .dev-title {
-        font-size: 0.82rem;
-        color: #444;
-        margin-top: 0.4rem;
+      .dev-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 4rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1rem 0 2rem;
+      }
+      .dev-empty {
         text-align: center;
-        line-height: 1.3;
+        color: #888;
+        padding: 3rem 0;
+      }
+      .dev-row {
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .dev-row {
+          animation: none;
+          opacity: 1;
+        }
+      }
+      .dev-row.dev-row-reverse {
+        flex-direction: row-reverse;
+      }
+      .dev-row-media {
+        position: relative;
+        flex: 1 1 55%;
+        min-width: 0;
+        aspect-ratio: 16 / 9;
+        border-radius: 10px;
         overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        background: #000;
+      }
+      .dev-row-iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+      }
+      .dev-row-media .delete-btn {
+        background: rgba(0, 0, 0, 0.55) !important;
+        border: none !important;
+        width: 32px !important;
+        height: 32px !important;
+        top: 10px;
+        right: 10px;
+        border-radius: 50%;
+        color: #fff;
+      }
+      .dev-row-text {
+        flex: 1 1 45%;
+        min-width: 0;
+        padding: 0 0.5rem;
+      }
+      .dev-row-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #111;
+        margin: 0 0 0.75rem;
+      }
+      .dev-row-desc {
+        color: #555;
+        line-height: 1.6;
+        margin: 0 0 1.25rem;
+      }
+      .dev-row-expand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 900px) {
+        .dev-row,
+        .dev-row.dev-row-reverse {
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+        .dev-row-media,
+        .dev-row-text {
+          flex: 1 1 100%;
+          width: 100%;
+        }
+        .dev-row-text {
+          padding: 0;
+          text-align: center;
+        }
+        .dev-row-expand {
+          margin: 0 auto;
+        }
+        .dev-rows {
+          gap: 2.5rem;
+        }
       }
       .dev-gumroad-note {
         text-align: center;
@@ -463,27 +552,6 @@
       .dev-add-form button {
         align-self: flex-start;
       }
-      .gallery-item.dev-item {
-        background: transparent !important;
-        box-shadow: none !important;
-      }
-      .gallery-item.dev-item:hover {
-        background: transparent !important;
-        box-shadow: none !important;
-      }
-      .gallery-item.dev-item .dev-link {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-      }
-      .gallery-item.dev-item img {
-        aspect-ratio: 16 / 9;
-        object-fit: cover;
-        display: block;
-        width: 100%;
-        border-radius: 6px;
-      }
-
       /* Trash button */
       .delete-btn {
         position: absolute;
@@ -2070,27 +2138,36 @@
 
             content.innerHTML = `
               <section class="portfolio-wrapper dev-wrapper">
-                <div class="gallery">
-                  ${devItems.length === 0 ? `<p style="text-align:center;color:#888;grid-column:1/-1;padding:3rem 0;">No videos yet.</p>` : ""}
+                <div class="dev-rows">
+                  ${devItems.length === 0 ? `<p class="dev-empty">No videos yet.</p>` : ""}
                   ${devItems
                     .map(
-                      (item) => {
+                      (item, idx) => {
                         const safeAlt = (item.title || "Development video")
                           .replace(/&/g, "&amp;")
                           .replace(/"/g, "&quot;")
                           .replace(/</g, "&lt;")
                           .replace(/>/g, "&gt;");
                         return `
-                  <div class="gallery-item dev-item ${token ? "admin" : ""}" data-id="${item.id}">
-                    <div class="dev-link" data-video-id="${item.videoId}" data-title="${item.title ? safeAlt : ''}" style="cursor:pointer;">
-                      <img
-                        src="https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg"
-                        alt="${safeAlt}"
+                  <div class="dev-row ${idx % 2 === 1 ? "dev-row-reverse" : ""}" data-id="${item.id}">
+                    <div class="dev-row-media">
+                      <iframe
+                        class="dev-row-iframe"
+                        src="https://www.youtube.com/embed/${item.videoId}?enablejsapi=1&mute=1&rel=0&playsinline=1"
+                        title="${safeAlt}"
                         loading="lazy"
-                      >
-                      ${item.title ? `<div class="dev-title"></div>` : ""}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                      ></iframe>
+                      ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
                     </div>
-                    ${token ? `<button class="delete-btn"><i class="fas fa-trash-alt"></i></button>` : ""}
+                    <div class="dev-row-text">
+                      <h3 class="dev-row-title"></h3>
+                      <p class="dev-row-desc">An in-progress look at one of the current development projects.</p>
+                      <button class="dev-row-expand" data-video-id="${item.videoId}" data-title="${item.title ? safeAlt : ''}">
+                        <i class="fas fa-expand"></i> Watch fullscreen
+                      </button>
+                    </div>
                   </div>`;
                       }
                     )
@@ -2113,31 +2190,47 @@
 
             // Safely set title text to prevent XSS
             devItems.forEach((item) => {
-              const el = document.querySelector(`[data-id="${item.id}"] .dev-title`);
-              if (el && item.title) el.textContent = item.title;
+              const el = document.querySelector(`[data-id="${item.id}"] .dev-row-title`);
+              if (el) el.textContent = item.title || "Untitled Project";
             });
 
             // Build ordered list of video objects for lightbox navigation
             mediaItems = [];
             devVideoItems = Array.from(
-              document.querySelectorAll(".dev-link[data-video-id]")
+              document.querySelectorAll(".dev-row-expand[data-video-id]")
             ).map((l) => ({ videoId: l.dataset.videoId, title: l.dataset.title || "" }));
 
-            // Open YouTube lightbox on thumbnail click
-            document.querySelectorAll(".dev-link[data-video-id]").forEach((link, idx) => {
-              link.addEventListener("click", (e) => {
+            // Open YouTube lightbox on "Watch fullscreen" click
+            document.querySelectorAll(".dev-row-expand[data-video-id]").forEach((btn, idx) => {
+              btn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 currentDevIndex = idx;
                 openYoutubeLightbox();
               });
             });
 
+            // Hover-to-preview: play muted on hover, pause on mouse leave
+            document.querySelectorAll(".dev-row-media").forEach((mediaEl) => {
+              const iframe = mediaEl.querySelector(".dev-row-iframe");
+              if (!iframe) return;
+              const sendCmd = (func) => {
+                try {
+                  iframe.contentWindow?.postMessage(
+                    JSON.stringify({ event: "command", func, args: [] }),
+                    "*"
+                  );
+                } catch (err) {}
+              };
+              mediaEl.addEventListener("mouseenter", () => sendCmd("playVideo"));
+              mediaEl.addEventListener("mouseleave", () => sendCmd("pauseVideo"));
+            });
+
             if (token) {
               // Delete buttons
-              document.querySelectorAll(".gallery-item.dev-item .delete-btn").forEach((btn) => {
+              document.querySelectorAll(".dev-row .delete-btn").forEach((btn) => {
                 btn.addEventListener("click", async (e) => {
                   e.stopPropagation();
-                  const id = btn.closest(".gallery-item").dataset.id;
+                  const id = btn.closest(".dev-row").dataset.id;
                   try {
                     const r = await fetch("/development-videos/" + id, {
                       method: "DELETE",
@@ -2154,19 +2247,6 @@
                     alert("❌ Delete failed. Please try again.");
                   }
                 });
-              });
-
-              // Adaptive icon colour on thumbnails
-              document.querySelectorAll(".gallery-item.dev-item.admin").forEach((item) => {
-                const btn = item.querySelector(".delete-btn");
-                const img = item.querySelector("img");
-                if (btn && img) {
-                  const canvas = document.createElement("canvas");
-                  const ctx = canvas.getContext("2d");
-                  const runCheck = () => setAdaptiveIconColor(img, btn, canvas, ctx);
-                  img.addEventListener("load", runCheck);
-                  if (img.complete) runCheck();
-                }
               });
 
               // Add video form
@@ -2198,7 +2278,7 @@
               });
             }
 
-            document.querySelectorAll(".gallery-item.dev-item").forEach((item, i) => {
+            document.querySelectorAll(".dev-row").forEach((item, i) => {
               item.style.animationDelay = `${i * 0.1}s`;
             });
           }
