@@ -79,5 +79,15 @@
     "caption": "",
     "category": "painting",
     "aspectRatio": "3 / 4"
+  },
+  {
+    "id": 1783301225151,
+    "url": "/uploads/portfolio/1783301211628-8701739.mp4",
+    "uploadedAt": "2026-07-06T01:27:05.151Z",
+    "fileType": "video/mp4",
+    "caption": "",
+    "category": "audio-visual",
+    "thumbnailUrl": "/uploads/portfolio/thumb_1783301211628-8701739.jpg",
+    "aspectRatio": "16 / 9"
   }
 ]
