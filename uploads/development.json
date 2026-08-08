@@ -1,16 +1,18 @@
 [
   {
-    "id": 1777245681007,
-    "videoId": "I847XcC12vA",
-    "youtubeUrl": "https://www.youtube.com/watch?v=I847XcC12vA",
-    "title": "Plonk-ish Demo",
-    "addedAt": "2026-04-26T23:21:21.007Z"
+    "id": 1786221231171,
+    "videoId": "_Q7s5Z-JIwA",
+    "youtubeUrl": "https://www.youtube.com/watch?v=_Q7s5Z-JIwA",
+    "title": "Facets - Preset Demo",
+    "description": "A new effect plugin inspired by the Intellijel \"Rainmaker\" module.",
+    "addedAt": "2026-08-08T20:33:51.171Z"
   },
   {
-    "id": 1777524999714,
+    "id": 1786221578913,
     "videoId": "w7AnE9CT9Aw",
     "youtubeUrl": "https://www.youtube.com/watch?v=w7AnE9CT9Aw",
     "title": "PointCloud VT Demo",
-    "addedAt": "2026-04-30T04:56:39.714Z"
+    "description": "A quick demo utilizing \"Media Pipe\" to control parameters in a graphic rendering program developed for some Immersive Art projects currently in progress.",
+    "addedAt": "2026-08-08T20:39:38.913Z"
   }
 ]
