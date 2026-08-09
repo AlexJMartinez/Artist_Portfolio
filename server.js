@@ -1073,9 +1073,12 @@ app.use(
   }),
 );
 
-// Serve static files from public with caching
+// Serve static files from public with caching.
+// index: false — prevents express.static from auto-serving index.html for "/"
+// so the named SSR route handlers below can inject per-route head tags instead.
 app.use(
   express.static(path.join(__dirname, "public"), {
+    index: false,
     maxAge: "1d", // Cache for 1 day
     etag: true,
     setHeaders: (res, filePath) => {
@@ -1091,10 +1094,227 @@ app.use(
   }),
 );
 
+// ── SSR: head tags + body content for crawlers ──────────────────────────────
+// Social/AI crawlers (Facebook, Twitter, GPTBot, ClaudeBot, PerplexityBot,
+// etc.) don't execute JavaScript, so they'd see a blank page.  We fix this by:
+//   1. Injecting route-specific <title>, <meta description>, og:*, twitter:*,
+//      and <link rel="canonical"> into the <head> server-side.
+//   2. Pre-rendering meaningful semantic body content for each route so that
+//      crawlers can read and index the page even without JavaScript.
+// The SPA JS still hydrates/overwrites <main id="content"> after it loads,
+// so interactive behaviour is unchanged for real users.
+
+const SPA_SHELL = fs.readFileSync(
+  path.join(__dirname, "public", "index.html"),
+  "utf8",
+);
+
+// Shared HTML-escape helper (used in both head and body rendering)
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Read a JSON data file safely; returns [] or {} on failure
+function readJson(relPath, fallback = []) {
+  try {
+    const abs = path.join(__dirname, relPath);
+    if (!fs.existsSync(abs)) return fallback;
+    return JSON.parse(fs.readFileSync(abs, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
+
+// Default OG image (about photo — works for every route)
+const DEFAULT_OG_IMG_PATH = "/uploads/about/1757387371946.JPG";
+
+const PAGE_META = {
+  home: {
+    title: "Alex Martínez – Artist | Minimalist Abstract Expression",
+    description:
+      "The portfolio of Alex Martínez — Creative Technologist, Mixed Multimedia Artist, Painter, and Photographer exploring Abstract, Generative Art, and Immersive Experiences.",
+  },
+  portfolio: {
+    title: "Portfolio – Alex Martínez | Photography, Painting & Audio Visual",
+    description:
+      "Browse Alex Martínez's portfolio of Photography, Painting, and Audio Visual work — a curated collection of Abstract and Mixed Multimedia Art.",
+    ogImgPath: "/uploads/portfolio/1757007912549.JPG",
+  },
+  about: {
+    title: "About – Alex Martínez | Creative Technologist & Artist",
+    description:
+      "Learn about Alex Martínez — Creative Technologist, Creative Coder, and Mixed Multimedia Artist driven by the intersection of technology and abstract expression.",
+  },
+  development: {
+    title: "Development – Alex Martínez | Creative Coding & Generative Art",
+    description:
+      "Explore Alex Martínez's development work — Creative Coding, Generative Art, and immersive audio-visual experiments at the intersection of code and art.",
+  },
+  contact: {
+    title: "Contact – Alex Martínez",
+    description:
+      "Get in touch with Alex Martínez — Creative Technologist and Mixed Multimedia Artist.",
+  },
+};
+
+// Build the full SSR <head> block for a given route
+function ssrHead(route, baseUrl) {
+  const m = PAGE_META[route] || PAGE_META.home;
+  const canonicalPath = route === "home" ? "/" : `/${route}`;
+  const ogImg = `${baseUrl}${m.ogImgPath || DEFAULT_OG_IMG_PATH}`;
+  const ogUrl = `${baseUrl}${canonicalPath}`;
+  return `<title>${esc(m.title)}</title>
+    <meta name="description" content="${esc(m.description)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Alex Martínez" />
+    <meta property="og:title" content="${esc(m.title)}" />
+    <meta property="og:description" content="${esc(m.description)}" />
+    <meta property="og:image" content="${esc(ogImg)}" />
+    <meta property="og:url" content="${esc(ogUrl)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${esc(m.title)}" />
+    <meta name="twitter:description" content="${esc(m.description)}" />
+    <meta name="twitter:image" content="${esc(ogImg)}" />
+    <link rel="canonical" href="${esc(ogUrl)}" />`;
+}
+
+// Build semantic body HTML for each route so crawlers can read real content.
+// JS will replace this with the interactive version after it loads.
+function ssrBody(route, baseUrl) {
+  switch (route) {
+    case "home":
+      return `<section class="hero">
+        <h1>Alex Martínez</h1>
+        <p>Minimalist Abstract Expression — Creative Technologist, Mixed Multimedia Artist, Painter &amp; Photographer.</p>
+        <nav aria-label="Social links">
+          <a href="https://instagram.com/debtfortunes" rel="noopener" aria-label="Instagram">Instagram</a>
+          <a href="https://www.linkedin.com/in/alexanderjustinmartinez/" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
+          <a href="https://github.com/AlexJMartinez" rel="noopener" aria-label="GitHub">GitHub</a>
+        </nav>
+      </section>`;
+
+    case "portfolio": {
+      const items = readJson("uploads/portfolio.json", []);
+      const categories = [
+        { key: "photography", label: "Photography" },
+        { key: "audio-visual", label: "Audio Visual" },
+        { key: "painting", label: "Painting" },
+      ];
+      const sections = categories
+        .map(({ key, label }) => {
+          const group = items.filter(
+            (i) => (i.category || "photography") === key,
+          );
+          if (group.length === 0) return `<section><h2>${label}</h2><p>No items yet.</p></section>`;
+          const imgs = group
+            .map((item) => {
+              const src = `${baseUrl}${item.url}`;
+              const alt = esc(item.caption || label + " artwork by Alex Martínez");
+              return `<figure><img src="${esc(src)}" alt="${alt}" loading="lazy" /></figure>`;
+            })
+            .join("\n");
+          return `<section>\n<h2>${label}</h2>\n${imgs}\n</section>`;
+        })
+        .join("\n");
+      return `<div class="portfolio-wrapper">${sections}</div>`;
+    }
+
+    case "about": {
+      const aboutData = readJson("uploads/about.json", {});
+      const imgHtml = aboutData.image
+        ? `<img src="${esc(baseUrl + aboutData.image)}" alt="Alex Martínez" />`
+        : "";
+      return `<section class="about">
+        ${imgHtml}
+        <div class="about-text">
+          <h2>About The Artist</h2>
+          <p>"It's no measure of health to be well adjusted to a profoundly sick society" — Jiddu Krishnamurti</p>
+          <h3>Debt Fortunes</h3>
+          <p>Modern economies thrive on leverage. Governments issue bonds, corporations finance expansion with loans, and households use credit to buy homes, cars, and education. Debt is often the engine of fortune creation — fueling innovation, infrastructure, and consumerism.</p>
+          <p>But debt isn't neutral. For poorer nations, "Debt Fortunes" often means dependence on richer creditors — through IMF or World Bank loans that come with structural conditions. This creates a cycle where fortunes in the Global North are sustained by perpetual repayment burdens in the Global South.</p>
+          <p>In many cultures, debt carries stigma, while in others it's normalized — even celebrated as part of the "American Dream." This cultural acceptance turns debt into a status signal: mortgages imply ownership, venture debt implies ambition.</p>
+          <p>Debt magnifies fortunes but also magnifies collapses. The 2008 financial crisis showed how debt-fueled housing markets could create immense wealth for some and destroy lives for others.</p>
+          <p>On a societal level, "Debt Fortunes" reflects how humanity has tethered its sense of progress to a future that doesn't yet exist. Fortune, then, isn't about what we own now, but about the gamble that tomorrow will let us pay for today's ambition.</p>
+        </div>
+      </section>`;
+    }
+
+    case "development": {
+      const videos = readJson("uploads/development.json", []);
+      if (videos.length === 0) {
+        return `<section><h2>Development</h2><p>Creative Coding, Generative Art, and immersive audio-visual experiments. No videos yet.</p></section>`;
+      }
+      const rows = videos
+        .map((v) => {
+          const title = esc(v.title || "Untitled Project");
+          const desc = esc(
+            v.description ||
+              "An in-progress look at one of the current development projects.",
+          );
+          const ytUrl = `https://www.youtube.com/watch?v=${esc(v.videoId)}`;
+          return `<article>
+            <h3>${title}</h3>
+            <p>${desc}</p>
+            <a href="${ytUrl}" rel="noopener">Watch on YouTube</a>
+          </article>`;
+        })
+        .join("\n");
+      return `<section class="portfolio-wrapper dev-wrapper">
+        <h2>Development</h2>
+        <p>Creative Coding, Generative Art, and immersive audio-visual experiments. Also available via <a href="https://ohseven.gumroad.com/" rel="noopener">ohseven.gumroad.com</a>.</p>
+        ${rows}
+      </section>`;
+    }
+
+    case "contact":
+      return `<div class="contact-container">
+        <div class="contact-card">
+          <h2>Contact</h2>
+          <p>Get in touch with Alex Martínez — Creative Technologist and Mixed Multimedia Artist.</p>
+          <p>Email: <a href="mailto:alexjmartinez0502@gmail.com">alexjmartinez0502@gmail.com</a></p>
+          <form id="contactForm" method="post" action="/contact">
+            <input type="text" name="name" placeholder="Your name" />
+            <input type="email" name="email" placeholder="Your email" />
+            <textarea name="message" placeholder="Message"></textarea>
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </div>`;
+
+    default:
+      return ssrBody("home", baseUrl);
+  }
+}
+
+function buildSpaHtml(route, req) {
+  const baseUrl = buildBaseUrl(req);
+  const head = ssrHead(route, baseUrl);
+  const body = ssrBody(route, baseUrl);
+  return SPA_SHELL
+    .replace("<title>Alex Martínez – Artist</title>", head)
+    .replace('<main id="content"></main>', `<main id="content">${body}</main>`);
+}
+
+function serveSpa(route) {
+  return (req, res) => {
+    res.set("Cache-Control", "no-store, must-revalidate");
+    res.type("html").send(buildSpaHtml(route, req));
+  };
+}
+
+const KNOWN_PAGES = ["portfolio", "about", "development", "contact"];
+app.get("/", serveSpa("home"));
+app.get("/home", (req, res) => res.redirect(301, "/"));
+KNOWN_PAGES.forEach((page) => app.get(`/${page}`, serveSpa(page)));
+
+// Catch-all: unknown paths fall back to the home shell
 app.get("*", (req, res) => {
-  // Prevent caching of the SPA shell to ensure fresh content
   res.set("Cache-Control", "no-store, must-revalidate");
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.type("html").send(buildSpaHtml("home", req));
 });
 
 // Global error handler for multer errors (must be after routes)

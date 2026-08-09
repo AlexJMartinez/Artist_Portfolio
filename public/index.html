@@ -2979,9 +2979,38 @@
           updateCarousel(false);
         }
 
-        // Scroll to top on page navigation
+        // ── Client-side URL routing ──────────────────────────────────────────
+        // Each section gets its own shareable URL (/portfolio, /about, etc.)
+        // so that back/forward and direct links work correctly, and so the
+        // server-injected SSR head tags match what the user is actually viewing.
+        const PUBLIC_PAGES = ["home", "portfolio", "about", "development", "contact"];
+
+        const PAGE_TITLES = {
+          home: "Alex Martínez – Artist | Minimalist Abstract Expression",
+          portfolio: "Portfolio – Alex Martínez | Photography, Painting & Audio Visual",
+          about: "About – Alex Martínez | Creative Technologist & Artist",
+          development: "Development – Alex Martínez | Creative Coding & Generative Art",
+          contact: "Contact – Alex Martínez",
+        };
+
+        // Scroll to top on page navigation + push URL state
         const _origLoadPage = loadPage;
-        loadPage = function(page) { _origLoadPage(page); window.scrollTo(0, 0); };
+        loadPage = function(page, fromPopstate) {
+          if (!fromPopstate && PUBLIC_PAGES.includes(page)) {
+            const url = page === "home" ? "/" : "/" + page;
+            history.pushState({ page }, "", url);
+            document.title = PAGE_TITLES[page] || "Alex Martínez – Artist";
+          }
+          _origLoadPage(page);
+          window.scrollTo(0, 0);
+        };
+
+        // Handle browser back/forward
+        window.addEventListener("popstate", (e) => {
+          const page = (e.state && e.state.page) || "home";
+          document.title = PAGE_TITLES[page] || "Alex Martínez – Artist";
+          loadPage(page, true);
+        });
 
         window.addEventListener("scroll", handleScroll, {
           passive: true,
@@ -2989,7 +3018,13 @@
         handleScroll(); // initialize state on load/restore
         /* Boot */
         updateNavigation(); // Set initial navigation state
-        loadPage("home");
+
+        // Detect the section from the current URL so direct links work
+        const _urlPage = location.pathname.replace(/^\/+/, "") || "home";
+        const _initialPage = PUBLIC_PAGES.includes(_urlPage) ? _urlPage : "home";
+        // Set history state on the current entry so popstate can retrieve it
+        history.replaceState({ page: _initialPage }, "", location.pathname || "/");
+        loadPage(_initialPage, true);
 
         // Make functions globally accessible for inline onclick handlers
         window.loadPage = loadPage;
