@@ -8,21 +8,31 @@
     />
     <title>Alex Martínez – Artist</title>
     <meta name="keywords" content="Abstract, Audio Visual, Immersive Art, Creative Technologist, Creative Coding, Generative Art, Developer, Mixed Multimedia Artist, Painter, Photographer, Media" />
+    <!-- PicoCSS: synchronous — drives core layout, needed for first paint -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <!-- Performance: DNS prefetch for CDNs -->
-    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-    <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
-    <!-- Remove preload to avoid duplicate fetches since stylesheets are already linked above -->
+    <!-- Font Awesome: loaded asynchronously so it never blocks first paint.
+         Icons are decorative/appear after interaction, so the brief delay is
+         imperceptible to users while meaningfully improving LCP. -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      />
+    </noscript>
     <style>
       body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
