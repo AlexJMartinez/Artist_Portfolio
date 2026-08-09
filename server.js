@@ -1180,7 +1180,53 @@ function ssrHead(route, baseUrl) {
     <meta name="twitter:title" content="${esc(m.title)}" />
     <meta name="twitter:description" content="${esc(m.description)}" />
     <meta name="twitter:image" content="${esc(ogImg)}" />
-    <link rel="canonical" href="${esc(ogUrl)}" />`;
+    <link rel="canonical" href="${esc(ogUrl)}" />
+    <script type="application/ld+json">${JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": `${baseUrl}/#person`,
+          "name": "Alex Martínez",
+          "url": `${baseUrl}/`,
+          "sameAs": [
+            "https://instagram.com/debtfortunes",
+            "https://www.linkedin.com/in/alexanderjustinmartinez/",
+            "https://github.com/AlexJMartinez"
+          ],
+          "jobTitle": "Multidisciplinary Artist",
+          "description": "Minimalist abstract expressionist working in photography, audio-visual, and painting.",
+          "knowsAbout": [
+            "Abstract Art",
+            "Generative Art",
+            "Creative Coding",
+            "Immersive Art",
+            "Photography",
+            "Painting",
+            "Audio Visual"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": `${baseUrl}/#website`,
+          "url": `${baseUrl}/`,
+          "name": "Alex Martínez – Artist",
+          "description": "Portfolio of Alex Martínez — Creative Technologist and Mixed Multimedia Artist.",
+          "publisher": { "@id": `${baseUrl}/#person` },
+          "inLanguage": "en-US"
+        },
+        {
+          "@type": "WebPage",
+          "@id": `${ogUrl}#webpage`,
+          "url": ogUrl,
+          "name": m.title,
+          "description": m.description,
+          "isPartOf": { "@id": `${baseUrl}/#website` },
+          "about": { "@id": `${baseUrl}/#person` },
+          "inLanguage": "en-US"
+        }
+      ]
+    })}</script>`;
 }
 
 // Build semantic body HTML for each route so crawlers can read real content.
