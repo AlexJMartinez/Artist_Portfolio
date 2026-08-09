@@ -1175,6 +1175,7 @@ function ssrHead(route, baseUrl) {
     <meta property="og:description" content="${esc(m.description)}" />
     <meta property="og:image" content="${esc(ogImg)}" />
     <meta property="og:url" content="${esc(ogUrl)}" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${esc(m.title)}" />
     <meta name="twitter:description" content="${esc(m.description)}" />
