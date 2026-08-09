@@ -1405,13 +1405,13 @@
       </button>
 
       <ul id="primary-menu">
-        <li><a onclick="loadPage('home')">Home</a></li>
-        <li><a onclick="loadPage('portfolio')">Portfolio</a></li>
-        <li><a onclick="loadPage('about')">About</a></li>
-        <li><a onclick="loadPage('development')">Development</a></li>
-        <li><a onclick="loadPage('contact')">Contact</a></li>
+        <li><a href="/" onclick="loadPage('home'); return false;">Home</a></li>
+        <li><a href="/portfolio" onclick="loadPage('portfolio'); return false;">Portfolio</a></li>
+        <li><a href="/about" onclick="loadPage('about'); return false;">About</a></li>
+        <li><a href="/development" onclick="loadPage('development'); return false;">Development</a></li>
+        <li><a href="/contact" onclick="loadPage('contact'); return false;">Contact</a></li>
         <li>
-          <a id="loginBtn" onclick="loadPage('login')">Login</a>
+          <a id="loginBtn" onclick="loadPage('login'); return false;">Login</a>
           <a id="logoutBtn" onclick="logout()" style="display: none">Logout</a>
         </li>
       </ul>

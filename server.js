@@ -1353,6 +1353,40 @@ function serveSpa(route) {
   };
 }
 
+// ── robots.txt ───────────────────────────────────────────────────────────────
+app.get("/robots.txt", (req, res) => {
+  const baseUrl = buildBaseUrl(req);
+  res.set("Content-Type", "text/plain");
+  res.set("Cache-Control", "public, max-age=86400"); // cache 1 day
+  res.send(
+    `User-agent: *\nAllow: /\nDisallow: /login\n\nSitemap: ${baseUrl}/sitemap.xml\n`,
+  );
+});
+
+// ── sitemap.xml ───────────────────────────────────────────────────────────────
+app.get("/sitemap.xml", (req, res) => {
+  const baseUrl = buildBaseUrl(req);
+  const today = new Date().toISOString().slice(0, 10);
+  const urls = [
+    { loc: `${baseUrl}/`,            priority: "1.0", changefreq: "weekly"  },
+    { loc: `${baseUrl}/portfolio`,   priority: "0.9", changefreq: "weekly"  },
+    { loc: `${baseUrl}/about`,       priority: "0.7", changefreq: "monthly" },
+    { loc: `${baseUrl}/development`, priority: "0.7", changefreq: "monthly" },
+    { loc: `${baseUrl}/contact`,     priority: "0.5", changefreq: "yearly"  },
+  ];
+  const urlNodes = urls
+    .map(
+      ({ loc, priority, changefreq }) =>
+        `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`,
+    )
+    .join("\n");
+  res.set("Content-Type", "application/xml");
+  res.set("Cache-Control", "public, max-age=3600"); // cache 1 hour
+  res.send(
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlNodes}\n</urlset>\n`,
+  );
+});
+
 const KNOWN_PAGES = ["portfolio", "about", "development", "contact"];
 app.get("/", serveSpa("home"));
 app.get("/home", (req, res) => res.redirect(301, "/"));
