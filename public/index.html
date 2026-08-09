@@ -1062,9 +1062,18 @@
         border-radius: 6px;
       }
 
-      /* HIDE logout by default */
+      /* HIDE logout by default; shown as a button styled like a nav link */
       #logoutBtn {
         display: none !important;
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        color: #111;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
       }
       /* SHOW logout only when authenticated */
       .is-auth #logoutBtn {
@@ -1411,8 +1420,8 @@
         <li><a href="/development" onclick="loadPage('development'); return false;">Development</a></li>
         <li><a href="/contact" onclick="loadPage('contact'); return false;">Contact</a></li>
         <li>
-          <a id="loginBtn" onclick="loadPage('login'); return false;">Login</a>
-          <a id="logoutBtn" onclick="logout()" style="display: none">Logout</a>
+          <a id="loginBtn" href="/login" onclick="loadPage('login'); return false;">Login</a>
+          <button id="logoutBtn" onclick="logout()" type="button" style="display: none">Logout</button>
         </li>
       </ul>
     </nav>
@@ -1596,8 +1605,8 @@
               <h2 id="subtitle"></h2>
               <div class="subscribe">
                 <form id="subscribeForm">
-                  <input type="text" placeholder="Your name" required>
-                  <input type="email" placeholder="Your email" required>
+                  <input type="text" placeholder="Your name" aria-label="Your name" required>
+                  <input type="email" placeholder="Your email" aria-label="Your email" required>
                   <button>Subscribe</button>
                 </form>
               </div>
@@ -1716,7 +1725,7 @@
                       </div>
                     </div>
                     <div class="carousel-nav">
-                      <button class="carousel-btn prev" id="debtCarouselPrev"><i class="fas fa-chevron-left"></i></button>
+                      <button class="carousel-btn prev" id="debtCarouselPrev" aria-label="Previous slide"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
                       <div class="carousel-dots" id="debtCarouselDots">
                         <span class="dot active" data-slide="0"></span>
                         <span class="dot" data-slide="1"></span>
@@ -1724,7 +1733,7 @@
                         <span class="dot" data-slide="3"></span>
                         <span class="dot" data-slide="4"></span>
                       </div>
-                      <button class="carousel-btn next" id="debtCarouselNext"><i class="fas fa-chevron-right"></i></button>
+                      <button class="carousel-btn next" id="debtCarouselNext" aria-label="Next slide"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
                     </div>
                   </div>
                 </div>
@@ -1788,7 +1797,7 @@
                   ${
                     isVideo
                       ? `<div class="video-placeholder" data-src="${item.url}" style="aspect-ratio: ${item.aspectRatio || "16 / 9"};${item.thumbnailUrl ? ` background-image: url('${item.thumbnailUrl}');` : ""}"></div>`
-                      : `<img data-src="${item.url}" alt="Artwork" decoding="async"${item.aspectRatio ? ` style="aspect-ratio: ${item.aspectRatio}; object-fit: cover;"` : ""}>`
+                      : `<img data-src="${item.url}" alt="${item.caption ? item.caption.replace(/"/g, '&quot;') : 'Artwork by Alex Martínez'}" decoding="async"${item.aspectRatio ? ` style="aspect-ratio: ${item.aspectRatio}; object-fit: cover;"` : ""}>`
                   }
                   ${item.caption ? `<div class="caption"></div>` : ""}
                   ${
@@ -2366,9 +2375,9 @@
                 <div class="contact-card">
                   <h2 style="text-align:center;">Contact</h2>
                   <form id="contactForm">
-                    <input type="text" name="name" placeholder="Your name">
-                    <input type="email" name="email" placeholder="Your email">
-                    <textarea name="message" placeholder="Message"></textarea>
+                    <input type="text" name="name" placeholder="Your name" aria-label="Your name">
+                    <input type="email" name="email" placeholder="Your email" aria-label="Your email">
+                    <textarea name="message" placeholder="Message" aria-label="Message"></textarea>
                     <button type="submit">Send</button>
                   </form>
                 </div>
@@ -2408,9 +2417,9 @@
               <div class="login-card">
                 <h2>Login</h2>
                 <form id="loginForm">
-                  <input id="user" placeholder="Username" autocomplete="username">
+                  <input id="user" placeholder="Username" aria-label="Username" autocomplete="username">
                   <div class="password-field">
-                    <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
+                    <input id="pass" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password">
                     <button type="button" class="toggle-password" aria-label="Show password" aria-pressed="false">
                       <i class="fa-regular fa-eye"></i>
                     </button>
